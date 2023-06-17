@@ -1,4 +1,3 @@
-
 # Define AKS Cluster
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
   location                          = azurerm_resource_group.aks_rg.location
