@@ -1,10 +1,10 @@
 # Define AKS Cluster
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
-  location                          = azurerm_resource_group.aks_rg.location
-  resource_group_name               = azurerm_resource_group.aks_rg.name
-  name                              = "aks-cluster"
-  dns_prefix                        = "aks-cluster"
-  node_resource_group               = "aks_nodes_rg"
+  location                          = azurerm_resource_group.aks_cluster_rg.location
+  resource_group_name               = var.resource_group_name
+  name                              = var.cluster_name
+  dns_prefix                        = var.dns_prefix
+  node_resource_group               = var.node_resource_group
   public_network_access_enabled     = false
   run_command_enabled               = false
   private_cluster_enabled           = true
@@ -13,17 +13,17 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   open_service_mesh_enabled         = true
   role_based_access_control_enabled = true
   azure_active_directory_role_based_access_control {
-     managed                        = true            # AD Integrated
-     azure_rbac_enabled             = true            # with RBAC permissions granularity
+     managed                        = true                    # AD Integrated
+     azure_rbac_enabled             = true                    # with RBAC permissions granularity
      admin_group_object_ids         = ["${var.AD_GROUP_ID}"]  # for some AAD group identifier
   }
   identity {
-    type                            = "UserAssigned"  # Managed Identity
+    type                            = "UserAssigned"          # Managed Identity
     identity_ids                    = [ azurerm_user_assigned_identity.aks_cluster_identity.id ]
   }
   network_profile {
-    network_plugin                  = "azure"         # CNI Networking
-    network_policy                  = "azure"         # Not Calico
+    network_plugin                  = "azure"                 # CNI Networking
+    network_policy                  = "azure"                 # Not Calico
     outbound_type                   = "loadBalancer"
     service_cidr                    = "${var.my_service_cidr}"
     dns_service_ip                  = "${var.my_service_dns}"
@@ -49,16 +49,16 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     enable_auto_scaling             = true
   }
 
+  workload_autoscaler_profile{
+    keda_enabled                    = true
+    vertical_pod_autoscaler_enabled = true
+  }
+
   # ingress_application_gateway{
   #   gateway_id    - (Optional) The ID of the Application Gateway to integrate with the ingress controller of this Kubernetes Cluster. See this page for further details.
   #   subnet_id     - (Optional) The ID of the subnet on which to create an Application Gateway, which in turn will be integrated with the ingress controller of this Kubernetes Cluster. See this page for further details.
   #   #gateway_name - (Optional) The name of the Application Gateway to be used or created in the Nodepool Resource Group, which in turn will be integrated with the ingress controller of this Kubernetes Cluster. See this page for further details.
   #   #subnet_cidr  - (Optional) The subnet CIDR to be used to create an Application Gateway, which in turn will be integrated with the ingress controller of this Kubernetes Cluster. See this page for further details.
-  # }
-
-  # workload_autoscaler_profile{
-  #   keda_enabled                    = true
-  #   vertical_pod_autoscaler_enabled = true
   # }
 
   # api_server_access_profile {

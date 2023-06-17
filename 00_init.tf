@@ -15,7 +15,6 @@ provider "azurerm" {
   client_id       = "${var.ARM_CLIENT_ID}"
   client_secret   = "${var.ARM_CLIENT_SECRET}"
 }
-
 terraform {
   required_version = ">=1.0"
 
@@ -28,11 +27,4 @@ terraform {
 }
 
 data "azurerm_client_config" "current" {}
-
 data "azurerm_subscription" "primary" {}
-
-# Define the resource group
-resource "azurerm_resource_group" "aks_rg" {
-  name     = "aks-rg"
-  location = "eastus"
-}
