@@ -1,0 +1,1074 @@
+terraform {
+  required_version = ">=1.0"
+
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">=3.60.0"
+    }
+  }
+}
+provider "azurerm" {
+  features {
+     resource_group {
+       prevent_deletion_if_contains_resources = false
+     }    
+  }
+    subscription_id="${var.ARM_SUBSCRIPTION_ID}"
+    tenant_id="${var.ARM_TENANT_ID}"
+    client_id="${var.ARM_CLIENT_ID}"
+    client_secret="${var.ARM_CLIENT_SECRET}"
+  }
+
+
+variable "ARM_SUBSCRIPTION_ID" {
+    type = string
+}
+
+variable "ARM_TENANT_ID" {
+    type = string
+}
+
+variable "ARM_CLIENT_ID" {
+    type = string
+}
+
+variable "ARM_CLIENT_SECRET" {
+    type = string
+}
+
+data "azurerm_client_config" "current" {}
+
+# Define the resource group
+resource "azurerm_resource_group" "aks_rg" {
+  name     = "aks-rg"
+  location = "eastus"
+}
+
+# Define user assigned identities
+resource "azurerm_user_assigned_identity" "aks_cluster_identity" {
+  resource_group_name = azurerm_resource_group.aks_rg.name
+  location            = azurerm_resource_group.aks_rg.location
+  name                = "aks-cluster-identity"
+}
+# resource "azurerm_user_assigned_identity" "firewall_identity" {
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   location            = azurerm_resource_group.aks_rg.location
+#   name                = "firewall-identity"
+# }
+# resource "azurerm_user_assigned_identity" "wag_identity" {
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   location            = azurerm_resource_group.aks_rg.location
+#   name                = "wag-identity"
+# }
+# resource "azurerm_user_assigned_identity" "app_insights_identity" {
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   location            = azurerm_resource_group.aks_rg.location
+#   name                = "app-insights-identity"
+# }
+resource "azurerm_user_assigned_identity" "event_hub_identity" {
+  resource_group_name = azurerm_resource_group.aks_rg.name
+  location            = azurerm_resource_group.aks_rg.location
+  name                = "eventhub-identity"
+}
+# resource "azurerm_user_assigned_identity" "log_analytics_identity" {
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   location            = azurerm_resource_group.aks_rg.location
+#   name                = "log-analytics-identity"
+# }
+# resource "azurerm_user_assigned_identity" "monitor_workspace_identity" {
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   location            = azurerm_resource_group.aks_rg.location
+#   name                = "monitor-workspace-identity"
+# }
+# resource "azurerm_user_assigned_identity" "oms_agent_identity" {
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   location            = azurerm_resource_group.aks_rg.location
+#   name                = "oms-agent-identity"
+# }
+# resource "azurerm_user_assigned_identity" "container_insights_identity" {
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   location            = azurerm_resource_group.aks_rg.location
+#   name                = "container-insights-identity"
+# }
+# resource "azurerm_user_assigned_identity" "acr_identity" {
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   location            = azurerm_resource_group.aks_rg.location
+#   name                = "acr-identity"
+# }
+resource "azurerm_user_assigned_identity" "app_config_identity" {
+  resource_group_name = azurerm_resource_group.aks_rg.name
+  location            = azurerm_resource_group.aks_rg.location
+  name                = "app-config-identity"
+}
+# resource "azurerm_user_assigned_identity" "key_vault_identity" {
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   location            = azurerm_resource_group.aks_rg.location
+#   name                = "key-vault-identity"
+# }
+
+# Define the virtual network and subnets for AKS
+resource "azurerm_virtual_network" "aks_vnet" {
+  name                = "aks-vnet"
+  resource_group_name = azurerm_resource_group.aks_rg.name
+  location            = azurerm_resource_group.aks_rg.location
+  address_space       = ["10.0.0.0/16"]
+}
+
+# resource "azurerm_subnet" "pod_subnet" {
+#   name                 = "aks-pod-subnet"
+#   resource_group_name  = azurerm_resource_group.aks_rg.name
+#   virtual_network_name = azurerm_virtual_network.aks_vnet.name
+#   address_prefixes      = ["10.0.128.0/17"]
+# }
+
+# resource "azurerm_subnet" "node_subnet" {
+#   name                 = "aks-node-subnet"
+#   resource_group_name  = azurerm_resource_group.aks_rg.name
+#   virtual_network_name = azurerm_virtual_network.aks_vnet.name
+#   address_prefixes      = ["10.0.8.0/21"]
+#}
+    # service_cidrs = [   "" , 
+    #                     "", 
+    #                     "10.0.120.64/27"
+    #                 ]
+    # pod_cidrs =     [   
+    #                     "",
+    #                     "",
+    #                     "10.0.136.0/22"
+    #                 ]
+resource "azurerm_subnet" "default_node_pool" {
+  name                 = "default_node_pool"
+  resource_group_name  = azurerm_resource_group.aks_rg.name
+  virtual_network_name = azurerm_virtual_network.aks_vnet.name
+  address_prefixes      = ["10.0.128.0/22"]
+}
+
+resource "azurerm_subnet" "node_subnet_1" {
+  name                 = "aks-node-subnet-1"
+  resource_group_name  = azurerm_resource_group.aks_rg.name
+  virtual_network_name = azurerm_virtual_network.aks_vnet.name
+  address_prefixes      = ["10.0.120.0/27"]
+}
+
+resource "azurerm_subnet" "pod_subnet_1" {
+  name                 = "aks-pod-subnet-2"
+  resource_group_name  = azurerm_resource_group.aks_rg.name
+  virtual_network_name = azurerm_virtual_network.aks_vnet.name
+  address_prefixes      = ["10.0.132.0/22"]
+}
+
+resource "azurerm_subnet" "node_subnet_2" {
+  name                 = "aks-node-subnet_2"
+  resource_group_name  = azurerm_resource_group.aks_rg.name
+  virtual_network_name = azurerm_virtual_network.aks_vnet.name
+  address_prefixes      = ["10.0.120.32/27"]
+}
+
+resource "azurerm_subnet" "pod_subnet_2" {
+  name                 = "aks-pod-subnet-2"
+  resource_group_name  = azurerm_resource_group.aks_rg.name
+  virtual_network_name = azurerm_virtual_network.aks_vnet.name
+  address_prefixes      = ["10.0.145.0/22"]
+}
+
+resource "azurerm_subnet" "aks_firewall_subnet" {
+  name                 = "aks-firewall-subnet"
+  resource_group_name  = azurerm_resource_group.aks_rg.name
+  virtual_network_name = azurerm_virtual_network.aks_vnet.name
+  address_prefixes      = ["10.0.0.0/24"]
+}
+
+resource "azurerm_subnet" "backend_service_subnet" {
+  name                 = "aks-backend-service-subnet"
+  resource_group_name  = azurerm_resource_group.aks_rg.name
+  virtual_network_name = azurerm_virtual_network.aks_vnet.name
+  address_prefixes      = ["10.0.1.0/24"]
+}
+
+# Define the AKS network security group (NSG)
+resource "azurerm_network_security_group" "aks_nsg" {
+  name                = "aks-nsg"
+  resource_group_name = azurerm_resource_group.aks_rg.name
+  location            = azurerm_resource_group.aks_rg.location
+}
+
+# Define NSG rules
+resource "azurerm_network_security_rule" "pod_subnet_outbound" {
+  name                        = "pod-subnet-outbound"
+  resource_group_name         = azurerm_resource_group.aks_rg.name
+  network_security_group_name = azurerm_network_security_group.aks_nsg.name
+  priority                    = 100
+  direction                   = "Outbound"
+  access                      = "Allow"
+  protocol                    = "*"
+  source_port_range           = "*"
+  destination_port_range      = "*"
+  source_address_prefixes      = ["10.0.128.0/17"]
+  destination_address_prefixes = ["10.0.0.0/16"]
+}
+
+resource "azurerm_network_security_rule" "deny_node_to_pod_subnet" {
+  name                        = "deny-node-to-pod-subnet"
+  resource_group_name         = azurerm_resource_group.aks_rg.name
+  network_security_group_name = azurerm_network_security_group.aks_nsg.name
+  priority                    = 101
+  direction                   = "Inbound"
+  access                      = "Deny"
+  protocol                    = "*"
+  source_port_range           = "*"
+  destination_port_range      = "*"
+  source_address_prefixes      = ["10.0.8.0/21"]
+  destination_address_prefixes = ["10.0.128.0/17"]
+}
+
+resource "azurerm_network_security_rule" "deny_pod_to_node_subnet" {
+  name                        = "deny-pod-to-node-subnet"
+  resource_group_name         = azurerm_resource_group.aks_rg.name
+  network_security_group_name = azurerm_network_security_group.aks_nsg.name
+  priority                    = 102
+  direction                   = "Inbound"
+  access                      = "Deny"
+  protocol                    = "*"
+  source_port_range           = "*"
+  destination_port_range      = "*"
+  source_address_prefixes      = ["10.0.128.0/17"]
+  destination_address_prefixes = ["10.0.8.0/21"]
+}
+
+resource "azurerm_network_security_rule" "deny_node_subnet_egress" {
+  name                        = "deny-node-subnet-egress"
+  resource_group_name         = azurerm_resource_group.aks_rg.name
+  network_security_group_name = azurerm_network_security_group.aks_nsg.name
+  priority                    = 103
+  direction                   = "Outbound"
+  access                      = "Deny"
+  protocol                    = "*"
+  source_port_range           = "*"
+  destination_port_range      = "*"
+  source_address_prefixes      = ["10.0.8.0/21"]
+  destination_address_prefixes = ["10.0.0.0/24"]
+}
+
+# Assign NSG to subnets
+resource "azurerm_subnet_network_security_group_association" "pod_subnet_1_nsg_association" {
+  subnet_id                 = azurerm_subnet.pod_subnet_1.id
+  network_security_group_id = azurerm_network_security_group.aks_nsg.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "node_subnet_1_nsg_association" {
+  subnet_id                 = azurerm_subnet.node_subnet_1.id
+  network_security_group_id = azurerm_network_security_group.aks_nsg.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "pod_subnet_2_nsg_association" {
+  subnet_id                 = azurerm_subnet.pod_subnet_2.id
+  network_security_group_id = azurerm_network_security_group.aks_nsg.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "node_subnet_2_nsg_association" {
+  subnet_id                 = azurerm_subnet.node_subnet_2.id
+  network_security_group_id = azurerm_network_security_group.aks_nsg.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "aks_firewall_subnet_nsg_association" {
+  subnet_id                 = azurerm_subnet.aks_firewall_subnet.id
+  network_security_group_id = azurerm_network_security_group.aks_nsg.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "backend_service_subnet_nsg_association" {
+  subnet_id                 = azurerm_subnet.backend_service_subnet.id
+  network_security_group_id = azurerm_network_security_group.aks_nsg.id
+}
+
+# Define Event Hub Namespace using the assigned identity
+resource "azurerm_eventhub_namespace" "eventhub_namespace" {
+  name                = "eventhub-namespace"
+  resource_group_name = azurerm_resource_group.aks_rg.name
+  location            = azurerm_resource_group.aks_rg.location
+  sku = "Basic"
+
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      azurerm_user_assigned_identity.event_hub_identity.id
+    ]
+  }
+}
+
+# Define Log Analytics Workspace using the assigned identity
+resource "azurerm_log_analytics_workspace" "log_analytics_workspace" {
+  name                = "log-analytics-workspace"
+  resource_group_name = azurerm_resource_group.aks_rg.name
+  location            = azurerm_resource_group.aks_rg.location
+  sku = "PerGB2018"
+  #local_authentication_disabled = true
+#   identity {
+#     type = "UserAssigned"
+#     identity_ids = [
+#       azurerm_user_assigned_identity.log_analytics_identity.id
+#     ]
+#   }
+}
+
+# Configure Log Analytics to send output to Event Hub
+# resource "azurerm_log_analytics_workspace_customer_managed_key" "log_analytics_eventhub_key" {
+#   log_analytics_workspace_id      = azurerm_log_analytics_workspace.log_analytics_workspace.id
+#   key_vault_id                    = azurerm_user_assigned_identity.key_vault_identity.id
+#   key_name                        = "<key-name>"
+#   key_version                     = "<key-version>"
+#   eventhub_authorization_rule_name = "<eventhub-authorization-rule-name>"
+#   eventhub_namespace_id           = azurerm_eventhub_namespace.eventhub_namespace.id
+# }
+
+# Define Azure Monitor Workspace using the assigned identity
+resource "azurerm_monitor_workspace" "monitor_workspace" {
+  name                = "monitor-workspace"
+  resource_group_name = azurerm_resource_group.aks_rg.name
+  location            = azurerm_resource_group.aks_rg.location
+#   identity {
+#     type = "UserAssigned"
+#     identity_ids = [
+#       azurerm_user_assigned_identity.monitor_workspace_identity.id
+#     ]
+#   }
+}
+
+# # Configure Azure Monitor to send output to Event Hub
+# resource "azurerm_monitor_diagnostic_setting" "monitor_diagnostic_setting" {
+#   name                        = "monitor-diagnostic-setting"
+#   target_resource_id          = azurerm_monitor_workspace.monitor_workspace.id
+#   eventhub_authorization_rule_id = azurerm_eventhub_namespace.eventhub_namespace.default_primary_connection_string_id
+#   log {
+#     category = "AuditLogs"
+#     enabled  = true
+#   }
+#   metric {
+#     category = "AllMetrics"
+#     enabled  = true
+#   }
+# }
+
+# # Define OMS Agent using the assigned identity
+# resource "azurerm_container_service_oms_agent" "oms_agent" {
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   location            = azurerm_resource_group.aks_rg.location
+#   cluster_name        = "aks_cluster"
+#   identity_id         = azurerm_user_assigned_identity.oms_agent_identity.id
+#   workspace_id        = azurerm_log_analytics_workspace.log_analytics_workspace.workspace_id
+#   enabled             = true
+# }
+
+# # Configure Azure Monitor Workspace to send all metrics to Event Hub Namespace
+# resource "azurerm_monitor_action_group" "monitor_action_group" {
+#   name                = "monitor-action-group"
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   short_name          = "monitoractiongroup"
+#   email_receiver {
+#     name                   = "Brian Flynn"
+#     email_address          = "bflynn@guidehouse.com"
+#     use_common_alert_schema = true
+#   }
+#   azure_monitor_scheduled_query_rules_data_source_id = azurerm_monitor_workspace.monitor_workspace.id
+# }
+
+# Define App Insights for Containers using the assigned identity
+resource "azurerm_application_insights" "app_insights" {
+  name                = "app-insights"
+  resource_group_name = azurerm_resource_group.aks_rg.name
+  location            = azurerm_resource_group.aks_rg.location
+  application_type    = "other"
+
+#   identity {
+#     type = "UserAssigned"
+#     identity_ids = [
+#       azurerm_user_assigned_identity.app_insights_identity.id
+#     ]
+#   }
+}
+
+# # Configure App Insights for Containers to send logs to Log Analytics
+# resource "azurerm_application_insights_linked_storage_account" "app_insights_log_analytics" {
+#   application_insights_id   = azurerm_application_insights.app_insights.id
+#   storage_account_id        = azurerm_storage_account.log_analytics_storage_account.id
+#   table_granularity_in_days = 30
+#   backup_enabled            = true
+#   backup_retention_period   = 7
+# }
+
+# Configure App Insights for Containers to send metrics to Azure Monitor
+# resource "azurerm_monitor_metric_alert" "app_insights_metric_alert" {
+#   name                = "app-insights-metric-alert"
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+
+#   scopes = [
+#     azurerm_application_insights.app_insights.id
+#   ]
+
+#   criteria {
+#     metric_namespace = "microsoft.insights/components"
+#     metric_name      = "requests/count"
+#     aggregation      = "Total"
+#     operator         = "GreaterThan"
+#     threshold        = 1000
+#   }
+
+#   action {
+#     action_group_id = azurerm_monitor_action_group.monitor_action_group.id
+#   }
+# }
+
+# # Define Container Registry using the assigned identity
+# resource "azurerm_container_registry" "container_registry" {
+#   name                = "container_registry"
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   location            = azurerm_resource_group.aks_rg.location
+#   sku = "Basic"
+#   admin_enabled = false
+
+# #   identity {
+# #     type = "UserAssigned"
+# #     identity_ids = [
+# #       azurerm_user_assigned_identity.container_registry_identity.id
+# #     ]
+# #   }
+# }
+
+# Configure Container Registry to send logs to Log Analytics
+# resource "azurerm_container_registry_data_export" "container_registry_log_export" {
+#   container_registry_id  = azurerm_container_registry.container_registry.id
+#   name                   = "log-export"
+#   storage_account_id     = azurerm_storage_account.log_analytics_storage_account.id
+#   log_template           = "{\"time\":\"{TIMESTAMP}\",\"level\":\"{LEVEL}\",\"location\":\"{REGION}\",\"properties\":{\"{KEY}\":\"{VALUE}\"}}"
+#   retention_in_days      = 30
+#   registry_login_enabled = false
+# }
+
+# Configure Container Registry to send metrics to Azure Monitor
+# resource "azurerm_monitor_metric_alert" "container_registry_metric_alert" {
+#   name                = "container-registry-metric-alert"
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+
+#   scopes = [
+#     azurerm_container_registry.container_registry.id
+#   ]
+
+#   criteria {
+#     metric_namespace = "Microsoft.ContainerRegistry/registries"
+#     metric_name      = "LoginSucceeded"
+#     aggregation      = "Total"
+#     operator         = "GreaterThan"
+#     threshold        = 10
+#   }
+
+#   action {
+#     action_group_id = azurerm_monitor_action_group.monitor_action_group.id
+#   }
+# }
+
+# # Give Container Registry a private endpoint in the backend subnet
+# resource "azurerm_private_endpoint" "container_registry_private_endpoint" {
+#   name                = "container-registry-private-endpoint"
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   location            = azurerm_resource_group.aks_rg.location
+#   subnet_id           = azurerm_subnet.backend_service_subnet.id
+#   private_service_connection {
+#     is_manual_connection = true
+#     name                           = "container-registry-private-connection"
+#     private_connection_resource_id = azurerm_container_registry.container_registry.id
+#   }
+# }
+
+# # Define App Config Registry using the assigned identity
+# resource "azurerm_app_configuration" "app_config" {
+#   name                = "app-config"
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   location            = azurerm_resource_group.aks_rg.location
+
+#   identity {
+#     type = "UserAssigned"
+#     identity_ids = [
+#       azurerm_user_assigned_identity.app_config_identity.id
+#     ]
+#   }
+# }
+
+# # Configure App Config Registry to send logs and metrics to Log Analytics
+# resource "azurerm_monitor_diagnostic_setting" "app_config_diagnostic_setting" {
+#   name                = "app-config-diagnostic-setting"
+#   #resource_group_name = azurerm_resource_group.aks_rg.name
+#   target_resource_id  = azurerm_app_configuration.app_config.id
+
+#   enabled_log {
+#     category = "AppConfigurationLogs"
+#     # enabled  = true
+#   }
+
+#   metric {
+#     category = "AllMetrics"
+#     enabled  = true
+#   }
+
+#   log_analytics_workspace_id = azurerm_log_analytics_workspace.log_analytics_workspace.workspace_id
+# }
+
+# # Give App Config Registry a private endpoint in the backend subnet
+# resource "azurerm_private_endpoint" "app_config_private_endpoint" {
+#   name                = "app-config-private-endpoint"
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   location            = azurerm_resource_group.aks_rg.location
+#   subnet_id           = azurerm_subnet.backend_service_subnet.id
+
+#   private_service_connection {
+#     name                           = "app-config-private-connection"
+#     is_manual_connection = true
+#     private_connection_resource_id = azurerm_app_configuration.app_config.id
+#   }
+# }
+
+# # Define Key Vault using the assigned identity
+# resource "azurerm_key_vault" "key_vault" {
+#   name                = "key-vault"
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   location            = azurerm_resource_group.aks_rg.location
+
+#   sku_name = "standard"
+
+#   tenant_id = "${var.ARM_TENANT_ID}"
+
+# #   access_policy {
+# #     tenant_id                = "${var.ARM_TENANT_ID}"
+# #     object_id                = azurerm_user_assigned_identity.key_vault_identity.principal_id
+# #     secret_permissions       = ["get", "list", "set", "delete"]
+# #     key_permissions          = ["get", "list", "create", "update", "import", "delete", "backup", "restore", "recover", "purge"]
+# #     storage_permissions      = ["get", "list", "delete", "set", "update", "regeneratekey", "recover", "purge"]
+# #     certificate_permissions = ["get", "list", "create", "import", "update", "delete", "recover", "purge", "backup", "restore"]
+# #   }
+
+#   network_acls {
+#     default_action             = "Deny"
+#     bypass                     = "AzureServices"
+#     ip_rules                   = []
+#     virtual_network_subnet_ids = [azurerm_subnet.backend_service_subnet.id]
+#   }
+
+# #   identity {
+# #     type = "UserAssigned"
+# #     identity_ids = [
+# #       azurerm_user_assigned_identity.key_vault_identity.id
+# #     ]
+# #   }
+# }
+
+# # Configure Key Vault to send logs and metrics to Log Analytics
+# resource "azurerm_monitor_diagnostic_setting" "key_vault_diagnostic_setting" {
+#   name                = "key-vault-diagnostic-setting"
+#   target_resource_id  = azurerm_key_vault.key_vault.id
+
+#   enabled_log {
+#     category = "AuditEvent"
+#   }
+
+#   metric {
+#     category = "AllMetrics"
+#     enabled  = true
+#   }
+
+#   log_analytics_workspace_id = azurerm_log_analytics_workspace.log_analytics_workspace.workspace_id
+# }
+
+# # Define Firewall using the assigned identity
+# resource "azurerm_firewall" "firewall" {
+#   name                = "firewall"
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   location            = azurerm_resource_group.aks_rg.location
+#   sku_name = "AZFW_VNet"
+#   sku_tier = "Basic"
+
+# #   identity {
+# #     type = "UserAssigned"
+# #     identity_ids = [
+# #       azurerm_user_assigned_identity.firewall_identity.id
+# #     ]
+# #   }
+# }
+
+# # Configure Firewall to send logs and metrics to Log Analytics
+# resource "azurerm_monitor_diagnostic_setting" "firewall_diagnostic_setting" {
+#   name                = "firewall-diagnostic-setting"
+#   target_resource_id  = azurerm_firewall.firewall.id
+
+#   enabled_log {
+#     category = "FirewallLogs"
+#   }
+
+#   metric {
+#     category = "AllMetrics"
+#     enabled  = true
+#   }
+
+#   log_analytics_workspace_id = azurerm_log_analytics_workspace.log_analytics_workspace.workspace_id
+# }
+
+# # Configure Firewall to send metrics to Azure Monitor
+# resource "azurerm_monitor_action_group" "monitor_action_group" {
+#   name                = "example-actiongroup"
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   short_name          = "exampleact"
+
+#   webhook_receiver {
+#     name        = "callmyapi"
+#     service_uri = "http://example.com/alert"
+#   }
+# }
+
+# resource "azurerm_monitor_metric_alert" "firewall_metric_alert" {
+#   name                = "firewall-metric-alert"
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+
+#   scopes = [azurerm_firewall.firewall.id]
+
+#   criteria {
+#     metric_namespace = "Microsoft.Network/firewalls"
+#     metric_name      = "TotalRequests"
+#     aggregation      = "Total"
+#     operator         = "GreaterThan"
+#     threshold        = 100
+#   }
+
+#   action {
+#     action_group_id = azurerm_monitor_action_group.monitor_action_group.id
+#   }
+# }
+
+# # Define Web Application Gateway using the assigned identity
+# resource "azurerm_application_gateway" "app_gateway" {
+#   name                = "app-gateway"
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   location            = azurerm_resource_group.aks_rg.location
+  
+#   sku {
+#     name                  = "Standard_Small"
+#     tier     = "Standard"
+#     capacity            = 2
+#   }
+
+#   gateway_ip_configuration {
+#     name      = "aks-firewall-subnet"
+#     subnet_id = azurerm_subnet.aks_firewall_subnet.id
+#   }
+
+#   frontend_port {
+#     name = "local.frontend_port_name"
+#     port = 80
+#   }
+
+#   frontend_ip_configuration {
+#     name                 = "local.frontend_ip_configuration_name"
+#     #public_ip_address_id = azurerm_public_ip.example.id
+#   }
+
+#   backend_address_pool {
+#     name = "local.backend_address_pool_name"
+#   }
+
+#   backend_http_settings {
+#     name                  = "local.http_setting_name"
+#     cookie_based_affinity = "Disabled"
+#     path                  = "/path1/"
+#     port                  = 80
+#     protocol              = "Http"
+#     request_timeout       = 60
+#   }
+
+#   http_listener {
+#     name                           = "local.listener_name"
+#     frontend_ip_configuration_name = "local.frontend_ip_configuration_name"
+#     frontend_port_name             = "local.frontend_port_name"
+#     protocol                       = "Http"
+#   }
+
+#   request_routing_rule {
+#     name                       = "local.request_routing_rule_name"
+#     rule_type                  = "Basic"
+#     http_listener_name         = "local.listener_name"
+#     backend_address_pool_name  = "local.backend_address_pool_name"
+#     backend_http_settings_name = "local.http_setting_name"
+#   }
+# }
+  
+# # Define Web Application Gateway using the assigned identity
+# resource "azurerm_application_gateway" "app_gateway" {
+#   name                = "app-gateway"
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+#   location            = azurerm_resource_group.aks_rg.location
+  
+#   sku {
+#     name                  = "Standard_Small"
+#     tier     = "Standard"
+#     capacity            = 2
+#   }
+
+
+
+#   gateway_ip_configuration {
+#     name      = "aks-firewall-subnet"
+#     subnet_id = azurerm_subnet.aks_firewall_subnet.id
+#   }
+
+#   frontend_port {
+#     name = "local.frontend_port_name"
+#     port = 80
+#   }
+
+#   frontend_ip_configuration {
+#     name                 = "local.frontend_ip_configuration_name"
+#     #public_ip_address_id = azurerm_public_ip.example.id
+#   }
+
+#   backend_address_pool {
+#     name = "local.backend_address_pool_name"
+#   }
+
+#   backend_http_settings {
+#     name                  = "local.http_setting_name"
+#     cookie_based_affinity = "Disabled"
+#     path                  = "/path1/"
+#     port                  = 80
+#     protocol              = "Http"
+#     request_timeout       = 60
+#   }
+
+#   http_listener {
+#     name                           = "local.listener_name"
+#     frontend_ip_configuration_name = "local.frontend_ip_configuration_name"
+#     frontend_port_name             = "local.frontend_port_name"
+#     protocol                       = "Http"
+#   }
+
+#   request_routing_rule {
+#     name                       = "local.request_routing_rule_name"
+#     rule_type                  = "Basic"
+#     http_listener_name         = "local.listener_name"
+#     backend_address_pool_name  = "local.backend_address_pool_name"
+#     backend_http_settings_name = "local.http_setting_name"
+#   }
+
+# }
+
+# # Configure Web Application Gateway to send logs and metrics to Log Analytics
+# resource "azurerm_monitor_diagnostic_setting" "app_gateway_diagnostic_setting" {
+#   name                = "app-gateway-diagnostic-setting"
+#   target_resource_id  = azurerm_application_gateway.app_gateway.id
+
+#   enabled_log {
+#     category = "GatewayLogs"
+#   }
+
+#   metric {
+#     category = "AllMetrics"
+#     enabled  = true
+#   }
+
+#   log_analytics_workspace_id = azurerm_log_analytics_workspace.log_analytics_workspace.workspace_id
+# }
+
+# # Configure Web Application Gateway to send metrics to Azure Monitor
+# resource "azurerm_monitor_metric_alert" "app_gateway_metric_alert" {
+#   name                = "app-gateway-metric-alert"
+#   resource_group_name = azurerm_resource_group.aks_rg.name
+
+#   scopes = [azurerm_application_gateway.app_gateway.id]
+
+#   criteria {
+#     metric_namespace = "Microsoft.Network/applicationGateways"
+#     metric_name      = "TotalRequests"
+#     aggregation      = "Total"
+#     operator         = "GreaterThan"
+#     threshold        = 100
+#   }
+
+#   action {
+#     action_group_id = azurerm_monitor_action_group.monitor_action_group.id
+#   }
+# }
+
+# Define AKS Cluster
+resource "azurerm_kubernetes_cluster" "aks_cluster" {
+  name                = "aks-cluster"
+  location            = azurerm_resource_group.aks_rg.location
+  resource_group_name = azurerm_resource_group.aks_rg.name
+  dns_prefix          = "aks-cluster"
+  private_cluster_enabled = true
+  local_account_disabled = true
+  azure_active_directory_role_based_access_control {
+     managed                = true
+     azure_rbac_enabled     = true
+     admin_group_object_ids =  ["d5e94646-2bb4-4d7d-bbe7-017efe8d043e"]
+   }
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      azurerm_user_assigned_identity.aks_cluster_identity.id
+    ]
+  }
+  network_profile {
+    network_plugin = "azure"
+    network_policy = "azure"
+    outbound_type = "loadBalancer"
+    #docker_bridge_cidr = "172.17.0.1/16"
+    service_cidr = "10.255.0.0/16"
+    dns_service_ip = "10.255.0.4"
+    # service_cidrs = [   "10.0.120.0/27" , 
+    #                     "10.0.120.32/27", 
+    #                     "10.0.120.64/27"
+    #                 ]
+    # pod_cidrs =     [   
+    #                     "10.0.128.0/22",
+    #                     "10.0.132.0/22",
+    #                     "10.0.136.0/22"
+    #                 ]
+  }
+  default_node_pool {
+    vm_size = "Standard_B2s"
+    name            = "default"
+    node_count      = 3
+    enable_auto_scaling = true
+    min_count       = 3
+    max_count       = 4
+    max_pods        = 32
+    vnet_subnet_id = azurerm_subnet.default_node_pool.id
+    only_critical_addons_enabled = true
+    os_disk_size_gb = 30
+    #availability_zones = [1, 2, 3]
+    #mode            = "System"
+    #os_type         = "Linux"
+    #enable_taint     = true
+    # taints = [
+    #   {
+    #     key    = "CriticalAddonsOnly"
+    #     value  = "true"
+    #     effect = "NoSchedule"
+    #   }
+    # ]
+  }
+#   role_based_access_control {
+#     enabled = true
+#   }
+#   upgrade_policy {
+#     mode = "Manual"
+#   }
+#   agent_pool_profile {
+#     vm_size = "Standard_B2s"
+#     name            = "user-pool-1"
+#     node_count      = 3
+#     #availability_zones = [1, 2, 3]
+#     enable_auto_scaling = true
+#     min_count       = 3
+#     max_count       = 600
+#     max_pods        = 32
+#     #mode            = "User"
+#     os_disk_size_gb = 30
+#     # os_type         = "Linux"
+#     # enable_taint     = true
+#     # taints = [
+#     #   {
+#     #     key    = "pool1"
+#     #     value  = "true"
+#     #     effect = "NoSchedule"
+#     #   }
+#     # ]
+#   }
+
+#   agent_pool_profile {
+#     name            = "user-pool-2"
+#     node_count      = 3
+#     availability_zones = [1, 2, 3]
+#     enable_auto_scaling = true
+#     min_count       = 3
+#     max_count       = 300
+#     max_pods        = 32
+#     mode            = "User"
+#     os_disk_size_gb = 30
+#     os_type         = "Linux"
+#     tolerations = [
+#       {
+#         key      = "pool1"
+#         operator = "Exists"
+#         effect   = "NoExecute"
+#       }
+#     ]
+#   }
+
+#   addon_profile {
+#     azure_policy {
+#       enabled                     = true
+#       user_assigned_identity_id   = azurerm_user_assigned_identity.aks_cluster_identity.id
+#       log_analytics_workspace_id  = azurerm_log_analytics_workspace.log_analytics_workspace.id
+#       send_logs_to_workspace      = true
+#       send_metrics_to_workspace   = true
+#     }
+
+#     azure_monitor {
+#       enabled                    = true
+#       user_assigned_identity_id  = azurerm_user_assigned_identity.aks_cluster_identity.id
+#       log_analytics_workspace_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
+#     }
+
+#     oms_agent {
+#       enabled                   = true
+#       log_analytics_workspace_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
+#       send_logs_to_workspace    = true
+#       send_metrics_to_workspace = true
+#     }
+
+#     container_insights {
+#       enabled                   = true
+#       log_analytics_workspace_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
+#       send_logs_to_workspace    = true
+#       send_metrics_to_workspace = true
+#     }
+
+#     azure_firewall {
+#       enabled                   = true
+#       user_assigned_identity_id = azurerm_user_assigned_identity.aks_cluster_identity.id
+#       log_analytics_workspace_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
+#       send_logs_to_workspace    = true
+#       send_metrics_to_workspace = true
+#     }
+
+#     defender {
+#       enabled                   = true
+#       user_assigned_identity_id = azurerm_user_assigned_identity.aks_cluster_identity.id
+#       log_analytics_workspace_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
+#       send_logs_to_workspace    = true
+#       send_metrics_to_workspace = true
+#     }
+
+#     acr_integration {
+#       enabled                   = true
+#       user_assigned_identity_id = azurerm_user_assigned_identity.aks_cluster_identity.id
+#       log_analytics_workspace_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
+#       send_logs_to_workspace    = true
+#       send_metrics_to_workspace = true
+#     }
+#   }
+
+#   aad_profile {
+#     managed = true
+#     enable_azure_rbac = true
+#   }
+
+#   enable_defender_profile = true
+#  enable_pod_security_policy = true
+#  enable_keyvault = true
+#  disable_public_fqdn = false
+#  outbound_type       = "loadBalancer"
+
+#   pod_security_policy {
+#     enabled  = true
+#     name     = "restricted"
+#     metadata = <<EOF
+# apiVersion: policy/v1beta1
+# kind: PodSecurityPolicy
+# metadata:
+#   name: restricted
+# spec:
+#   privileged: false
+#   allowPrivilegeEscalation: false
+#   requiredDropCapabilities:
+#     - ALL
+#   allowedCapabilities: []
+#   volumes:
+#     - 'configMap'
+#     - 'downwardAPI'
+#     - 'emptyDir'
+#     - 'persistentVolumeClaim'
+#     - 'secret'
+#   hostNetwork: false
+#   hostIPC: false
+#   hostPID: false
+#   runAsUser:
+#     rule: MustRunAsNonRoot
+#   seLinux:
+#     rule: RunAsAny
+#   supplementalGroups:
+#     rule: MustRunAs
+#     ranges:
+#       - min: 1
+#         max: 65535
+#   fsGroup:
+#     rule: MustRunAs
+#     ranges:
+#       - min: 1
+#         max: 65535
+# EOF
+#   }
+
+#   auto_scaler_profile {
+#     name = "default"
+#     scan_interval = "5m"
+#     scale_down_delay_after_add = "10m"
+#     scale_down_delay_after_delete = "10m"
+#     scale_down_delay_after_failure = "3m"
+#     scale_down_unneeded_time = "20m"
+#     scale_down_unready_time = "10m"
+#     scale_down_evaluation_interval = "1m"
+
+#     auto_scaler_trigger {
+#       metric_name        = "cpu"
+#       metric_type        = "Resource"
+#       operator           = "GreaterThanOrEqualTo"
+#       threshold          = 50
+#       direction          = "Increase"
+#       cooldown           = "5m"
+#       max_replicas       = 10
+#       min_replicas       = 1
+#     }
+#   }
+
+#   service_principal {
+#     client_id     = "<service_principal_client_id>"
+#     client_secret = "<service_principal_client_secret>"
+#   }
+}
+
+# resource "azurerm_kubernetes_cluster_node_pool" "node_pool_2" {
+#   name = "node-pool-2"
+#   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks_cluster.id
+#   vm_size          "Standard_B2s"
+#   node_count        = 3
+#   min_count         = 3
+#   max_count         = 4
+#   max_pods          = 32
+#   os_disk_size_gb   = 30
+#   enable_auto_scaling = true
+#   vnet_subnet_id = azurerm_subnet.node_subnet_2.id
+#   pod_subnet_id = azurerm_subnet.pod_subnet_2.id
+#   tags = {
+#     Environment = "Production"
+#   }
+# }
+resource "azurerm_kubernetes_cluster_node_pool" "node_pool_1" {
+  name                  = "pool1"
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.aks_cluster.id
+  vm_size               = "Standard_B2s"
+  node_count            = 1
+  vnet_subnet_id = azurerm_subnet.node_subnet_1.id
+  pod_subnet_id = azurerm_subnet.pod_subnet_1.id
+  tags = {
+    Environment = "Production"
+  }
+}
+
+resource "azurerm_kubernetes_cluster_node_pool" "node_pool_2" {
+  name                  = "pool2"
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.aks_cluster.id
+  vm_size               = "Standard_B2s"
+  node_count            = 1
+  vnet_subnet_id = azurerm_subnet.node_subnet_2.id
+  pod_subnet_id = azurerm_subnet.pod_subnet_2.id
+  tags = {
+    Environment = "Production"
+  }
+}
