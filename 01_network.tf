@@ -1,3 +1,4 @@
+
 # Define the virtual network and subnets for AKS
 variable "my_service_cidr" {
     type = string
@@ -29,13 +30,10 @@ resource "azurerm_subnet" "aks_firewall_subnet" {
   name                  = "aks-firewall-subnet"
   address_prefixes      = ["10.0.0.0/24"]
   delegation {
-    name = "name-delegation"
-
+    name      = "name-delegation"
     service_delegation {
       name    = "Microsoft.ContainerService/managedClusters"
-      actions = [
-        "Microsoft.Network/networkinterfaces/*"
-        ]
+      actions = [ "Microsoft.Network/networkinterfaces/*" ]
     }
   }
 }
@@ -46,13 +44,10 @@ resource "azurerm_subnet" "backend_service_subnet" {
   name                  = "aks-backend-service-subnet"
   address_prefixes      = ["10.0.2.0/24"]
   delegation {
-    name = "name-delegation"
-
+    name      = "name-delegation"
     service_delegation {
       name    = "Microsoft.ContainerService/managedClusters"
-      actions = [
-        "Microsoft.Network/networkinterfaces/*"
-        ]
+      actions = [ "Microsoft.Network/networkinterfaces/*" ]
     }
   }
 }
@@ -66,12 +61,9 @@ resource "azurerm_subnet" "node_subnet_1" {
   address_prefixes      = ["10.0.124.0/27"]
   delegation {
     name = "name-delegation"
-
     service_delegation {
       name    = "Microsoft.ContainerService/managedClusters"
-      actions = [
-        "Microsoft.Network/networkinterfaces/*"
-        ]
+      actions = [ "Microsoft.Network/networkinterfaces/*" ]
     }
   }
 }
@@ -82,13 +74,10 @@ resource "azurerm_subnet" "node_subnet_2" {
   name                  = "aks-node-subnet-2"
   address_prefixes      = ["10.0.124.32/27"]
   delegation {
-    name = "name-delegation"
-
+    name      = "name-delegation"
     service_delegation {
       name    = "Microsoft.ContainerService/managedClusters"
-      actions = [
-        "Microsoft.Network/networkinterfaces/*"
-        ]
+      actions = [ "Microsoft.Network/networkinterfaces/*" ]
     }
   }
 }
@@ -100,13 +89,10 @@ resource "azurerm_subnet" "default_pod_pool" {
   name                  = "default_pod_pool"
   address_prefixes      = ["10.0.128.0/22"]
   delegation {
-    name = "name-delegation"
-
+    name      = "name-delegation"
     service_delegation {
       name    = "Microsoft.ContainerService/managedClusters"
-      actions = [
-        "Microsoft.Network/networkinterfaces/*"
-        ]
+      actions = [ "Microsoft.Network/networkinterfaces/*" ]
     }
   }
 }
@@ -117,13 +103,10 @@ resource "azurerm_subnet" "pod_subnet_1" {
   name                  = "aks-pod-subnet-1"
   address_prefixes      = ["10.0.132.0/22"]
   delegation {
-    name = "name-delegation"
-
+    name      = "name-delegation"
     service_delegation {
       name    = "Microsoft.ContainerService/managedClusters"
-      actions = [
-        "Microsoft.Network/networkinterfaces/*"
-        ]
+      actions = [ "Microsoft.Network/networkinterfaces/*" ]
     }
   }
 }
@@ -134,13 +117,10 @@ resource "azurerm_subnet" "pod_subnet_2" {
   name                  = "aks-pod-subnet-2"
   address_prefixes      = ["10.0.136.0/22"]
   delegation {
-    name = "name-delegation"
-
+    name      = "name-delegation"
     service_delegation {
       name    = "Microsoft.ContainerService/managedClusters"
-      actions = [
-        "Microsoft.Network/networkinterfaces/*"
-        ]
+      actions = [ "Microsoft.Network/networkinterfaces/*" ]
     }
   }
 }

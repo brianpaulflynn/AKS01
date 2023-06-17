@@ -1,7 +1,10 @@
+
 variable "ARM_SUBSCRIPTION_ID" { type = string }
 variable "ARM_TENANT_ID" { type = string }
 variable "ARM_CLIENT_ID" { type = string }
 variable "ARM_CLIENT_SECRET" { type = string }
+variable "AD_GROUP_ID" { type  = string }
+
 provider "azurerm" {
   features {
      resource_group {

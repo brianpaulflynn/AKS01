@@ -1,3 +1,4 @@
+
 # Define AKS Cluster
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
   location                          = azurerm_resource_group.aks_rg.location
@@ -13,17 +14,17 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   open_service_mesh_enabled         = true
   role_based_access_control_enabled = true
   azure_active_directory_role_based_access_control {
-     managed                        = true
-     azure_rbac_enabled             = true
-     admin_group_object_ids         = ["d5e94646-2bb4-4d7d-bbe7-017efe8d043e"]
+     managed                        = true            # AD Integrated
+     azure_rbac_enabled             = true            # with RBAC permissions granularity
+     admin_group_object_ids         = ["${var.AD_GROUP_ID}"]  # for some AAD group identifier
   }
   identity {
-    type                            = "UserAssigned"
+    type                            = "UserAssigned"  # Managed Identity
     identity_ids                    = [ azurerm_user_assigned_identity.aks_cluster_identity.id ]
   }
   network_profile {
-    network_plugin                  = "azure"   # CNI Networking
-    network_policy                  = "azure"   # Not Calico
+    network_plugin                  = "azure"         # CNI Networking
+    network_policy                  = "azure"         # Not Calico
     outbound_type                   = "loadBalancer"
     service_cidr                    = "${var.my_service_cidr}"
     dns_service_ip                  = "${var.my_service_dns}"
