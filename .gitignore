@@ -2,3 +2,4 @@
 .terraform.tfstate.lock.info
 terraform.tfstate
 .terraform/providers/registry.terraform.io/hashicorp/azurerm/3.61.0/linux_amd64/terraform-provider-azurerm_v3.61.0_x5
+terraform.tfstate.backup
