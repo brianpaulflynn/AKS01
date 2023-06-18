@@ -82,8 +82,8 @@ variable "subnets_map" {
         } ,
         aks_default_pod_pool = {
             address_prefixes   = ["10.0.128.0/22"]
-            service_delegation_name = null
-            actions = null
+            service_delegation_name = "Microsoft.ContainerService/managedClusters"
+            actions = [ "Microsoft.Network/networkinterfaces/*" ]
         } ,
         aks_pod_subnet_1 = {
             address_prefixes   = ["10.0.132.0/22"]
