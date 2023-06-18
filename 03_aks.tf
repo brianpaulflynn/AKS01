@@ -1,6 +1,6 @@
 # Define AKS Cluster
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
-  location                          = var.aks_config.aks_location
+  location                          = azurerm_resource_group.aks_cluster_rg.location #var.aks_location
   resource_group_name               = azurerm_resource_group.aks_cluster_rg.name #var.aks_cluster_rg
   name                              = var.aks_config.aks_cluster_name
   node_resource_group               = var.aks_config.aks_nodes_rg
