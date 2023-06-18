@@ -1,8 +1,8 @@
 # Suggestion: Define Availability Sets for node_pools to improve resiliency.
 resource "azurerm_kubernetes_cluster_node_pool" "node_pool_1" {
   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks_cluster.id
-  vnet_subnet_id        = azurerm_subnet.node_subnet_1.id
-  pod_subnet_id         = azurerm_subnet.pod_subnet_1.id
+  vnet_subnet_id        = azurerm_subnet.aks_subnets["aks_node_subnet_1"].id
+  pod_subnet_id         = azurerm_subnet.aks_subnets["aks_pod_subnet_1"].id
   enable_auto_scaling   = true
 
   name                  = "pool1"
@@ -19,8 +19,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "node_pool_1" {
 
 resource "azurerm_kubernetes_cluster_node_pool" "node_pool_2" {
   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks_cluster.id
-  vnet_subnet_id        = azurerm_subnet.node_subnet_2.id
-  pod_subnet_id         = azurerm_subnet.pod_subnet_2.id
+  vnet_subnet_id        = azurerm_subnet.aks_subnets["aks_node_subnet_2"].id
+  pod_subnet_id         = azurerm_subnet.aks_subnets["aks_pod_subnet_2"].id
   enable_auto_scaling   = true
 
   name                  = "pool2"

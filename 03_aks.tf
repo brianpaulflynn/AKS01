@@ -18,9 +18,9 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
      admin_group_object_ids         = [ var.AD_GROUP_ID ]  
   }                                                   # for some AAD group identifier
   network_profile {                                   # CNI Networking
-    network_plugin                  = "azure"
+    network_plugin                  = "azure"         # ...
     network_policy                  = "azure"         # Not Calico
-    outbound_type                   = "loadBalancer"
+    outbound_type                   = var.aks_loadBalancer_type
     service_cidr                    = var.aks_cluster_service_cidr
     dns_service_ip                  = var.aks_cluster_service_dns
   }
@@ -51,8 +51,8 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   #   #authorized_ip_ranges - (Optional) Set of authorized IP ranges to allow access to API server, e.g. ["198.51.100.0/24"].
   # }
   default_node_pool {
-    vnet_subnet_id                  = azurerm_subnet.default_node_pool.id
-    pod_subnet_id                   = azurerm_subnet.default_pod_pool.id
+    vnet_subnet_id                  = azurerm_subnet.aks_subnets["aks_default_node_pool"].id
+    pod_subnet_id                   = azurerm_subnet.aks_subnets["aks_default_pod_pool"].id
     vm_size                         = var.aks_cluster_default_node_pool_sku
     only_critical_addons_enabled    = true            # Best Practice
     name                            = "default"
