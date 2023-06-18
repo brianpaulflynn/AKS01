@@ -17,16 +17,16 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
      azure_rbac_enabled             = true            # with RBAC permissions granularity
      admin_group_object_ids         = [ var.AD_GROUP_ID ]  
   }                                                   # for some AAD group identifier
+  identity {                                          # Managed Identity
+    type                            = "UserAssigned"
+    identity_ids                    = [ azurerm_user_assigned_identity.aks_cluster_identity.id ]
+  }
   network_profile {                                   # CNI Networking
     network_plugin                  = "azure"         # ...
     network_policy                  = "azure"         # Not Calico
     outbound_type                   = var.aks_config.aks_loadBalancer_type
     service_cidr                    = var.aks_config.aks_cluster_service_cidr
     dns_service_ip                  = var.aks_config.aks_cluster_service_dns
-  }
-  identity {                                          # Managed Identity
-    type                            = "UserAssigned"
-    identity_ids                    = [ azurerm_user_assigned_identity.aks_cluster_identity.id ]
   }
   oms_agent {                                         # Container Insights
     msi_auth_for_monitoring_enabled = true
