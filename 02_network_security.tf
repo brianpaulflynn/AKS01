@@ -1,11 +1,11 @@
 # Define the AKS network security group (NSG)
 resource "azurerm_network_security_group" "aks_cluster_nsg" {
-  name                          = "${var.aks_cluster_name}-nsg"
+  name                          = "${var.aks_config.aks_cluster_name}-nsg"
   resource_group_name           = azurerm_resource_group.aks_cluster_rg.name
   location                      = azurerm_resource_group.aks_cluster_rg.location
 }
 resource "azurerm_subnet_network_security_group_association" "subnets_nsg_association" {
-  for_each                      = var.subnets_map
+  for_each                      = var.aks_config.subnets_map
   subnet_id                     = azurerm_subnet.aks_subnets[each.key].id
   network_security_group_id     = azurerm_network_security_group.aks_cluster_nsg.id
 }

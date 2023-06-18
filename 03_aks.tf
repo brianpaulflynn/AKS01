@@ -1,10 +1,10 @@
 # Define AKS Cluster
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
-  location                          = var.aks_location
+  location                          = var.aks_config.aks_location
   resource_group_name               = azurerm_resource_group.aks_cluster_rg.name #var.aks_cluster_rg
-  name                              = var.aks_cluster_name
-  node_resource_group               = var.aks_nodes_rg
-  dns_prefix                        = var.aks_cluster_dns_prefix
+  name                              = var.aks_config.aks_cluster_name
+  node_resource_group               = var.aks_config.aks_nodes_rg
+  dns_prefix                        = var.aks_config.aks_cluster_dns_prefix
   run_command_enabled               = false           # Best Practice for Prodcution Servers
   public_network_access_enabled     = false           # Best Practice Default
   private_cluster_enabled           = true            # Best Practice Default
@@ -20,9 +20,9 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   network_profile {                                   # CNI Networking
     network_plugin                  = "azure"         # ...
     network_policy                  = "azure"         # Not Calico
-    outbound_type                   = var.aks_loadBalancer_type
-    service_cidr                    = var.aks_cluster_service_cidr
-    dns_service_ip                  = var.aks_cluster_service_dns
+    outbound_type                   = var.aks_config.aks_loadBalancer_type
+    service_cidr                    = var.aks_config.aks_cluster_service_cidr
+    dns_service_ip                  = var.aks_config.aks_cluster_service_dns
   }
   workload_autoscaler_profile {                       # Keda autoscaler
     keda_enabled                    = true
@@ -53,7 +53,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   default_node_pool {
     vnet_subnet_id                  = azurerm_subnet.aks_subnets["aks_default_node_pool"].id
     pod_subnet_id                   = azurerm_subnet.aks_subnets["aks_default_pod_pool"].id
-    vm_size                         = var.aks_cluster_default_node_pool_sku
+    vm_size                         = var.aks_config.aks_cluster_default_node_pool_sku
     only_critical_addons_enabled    = true            # Best Practice
     name                            = "default"
     os_disk_size_gb                 = 30
