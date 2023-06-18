@@ -1,7 +1,7 @@
 # Define the resource group
 resource "azurerm_resource_group" "aks_cluster_rg" {
-  location = var.aks_location
-  name     = var.aks_cluster_rg
+  location            = var.aks_location
+  name                = var.aks_cluster_rg
 }
 
 # Create Azure Log Analytics Workspace
