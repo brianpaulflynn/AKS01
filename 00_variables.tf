@@ -49,7 +49,7 @@ variable "aks_cluster_vnet_cidr" {
 variable "subnets_map" {
     type =  map(    object( {   
                         address_prefixes        = list(string)
-                        service_delegation_name = string
+                        service_delegation_name = optional(string)
                         actions                 = optional(list(string))
                         }
                     )
