@@ -19,12 +19,12 @@ resource "azurerm_user_assigned_identity" "aks_cluster_identity" {
   name                = "${var.aks_cluster_name}-identity" # "aks-cluster-identity"
 }
 
-# Grant AKS cluster access to use AKS vnet
-resource "azurerm_role_assignment" "aks-cluster-access" {
-  role_definition_name = "Network Contributor"
-  scope                = azurerm_subnet.aks_subnets["aks_backend_service_subnet"].id
-                          # azurerm_subnet.aks_subnets[each.key].id
-                          # azurerm_subnet.backend_service_subnet.id
-  principal_id         = azurerm_user_assigned_identity.aks_cluster_identity.principal_id
- }
+# # Grant AKS cluster access to use AKS vnet
+# resource "azurerm_role_assignment" "aks-cluster-access" {
+#   role_definition_name = "Network Contributor"
+#   scope                = azurerm_subnet.aks_subnets["aks_backend_service_subnet"].id
+#                           # azurerm_subnet.aks_subnets[each.key].id
+#                           # azurerm_subnet.backend_service_subnet.id
+#   principal_id         = azurerm_user_assigned_identity.aks_cluster_identity.principal_id
+#  }
 
