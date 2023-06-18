@@ -5,6 +5,40 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   name                              = var.aks_cluster_name
   node_resource_group               = var.aks_nodes_rg
   dns_prefix                        = var.aks_cluster_dns_prefix
+  run_command_enabled               = false           # Best Practice for Prodcution Servers
+  public_network_access_enabled     = false           # Best Practice Default
+  private_cluster_enabled           = true            # Best Practice Default
+  azure_policy_enabled              = true            # Best Practice
+  open_service_mesh_enabled         = true            # Best Practice
+  local_account_disabled            = true            # Best Practice. And required by AAD integration.
+  #role_based_access_control_enabled = true           # does this conflict with azure_rbac_enabled?
+  azure_active_directory_role_based_access_control {  # AAD interated
+     managed                        = true
+     azure_rbac_enabled             = true            # with RBAC permissions granularity
+     admin_group_object_ids         = [ var.AD_GROUP_ID ]  
+  }                                                   # for some AAD group identifier
+  network_profile {                                   # CNI Networking
+    network_plugin                  = "azure"
+    network_policy                  = "azure"         # Not Calico
+    outbound_type                   = "loadBalancer"
+    service_cidr                    = var.aks_cluster_service_cidr
+    dns_service_ip                  = var.aks_cluster_service_dns
+  }
+  workload_autoscaler_profile {                       # Keda autoscaler
+    keda_enabled                    = true
+    vertical_pod_autoscaler_enabled = true
+  }
+  identity {                                          # Managed Identity
+    type                            = "UserAssigned"
+    identity_ids                    = [ azurerm_user_assigned_identity.aks_cluster_identity.id ]
+  }
+  oms_agent {                                         # Container Insights
+    msi_auth_for_monitoring_enabled = true
+    log_analytics_workspace_id      = azurerm_log_analytics_workspace.aks_log_analytics.id
+  }
+  microsoft_defender {                                # Defender
+    log_analytics_workspace_id      = azurerm_log_analytics_workspace.aks_log_analytics.id
+  }
   default_node_pool {
     vnet_subnet_id                  = azurerm_subnet.default_node_pool.id
     pod_subnet_id                   = azurerm_subnet.default_pod_pool.id
@@ -17,40 +51,6 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     max_count                       = 3               # Set max scale up to prevent runaway scaling
     max_pods                        = 32              # Restrictd by ratios of node/pod subnet sizes
     enable_auto_scaling             = true            # Scale for cost savings
-  }
-  workload_autoscaler_profile {
-    keda_enabled                    = true
-    vertical_pod_autoscaler_enabled = true
-  }
-  run_command_enabled               = false           # Best Practice for Prodcution Servers
-  public_network_access_enabled     = false           # Best Practice Default
-  private_cluster_enabled           = true            # Best Practice Default
-  azure_policy_enabled              = true            # Best Practice
-  open_service_mesh_enabled         = true            # Best Practice
-  local_account_disabled            = true            # Best Practice. And required by AAD integration.
-  #role_based_access_control_enabled = true           # does this conflict with azure_rbac_enabled?
-  azure_active_directory_role_based_access_control {  # AAD interated
-     managed                        = true
-     azure_rbac_enabled             = true                    # with RBAC permissions granularity
-     admin_group_object_ids         = [ var.AD_GROUP_ID ]  # for some AAD group identifier
-  }
-  network_profile {
-    network_plugin                  = "azure"         # CNI Networking
-    network_policy                  = "azure"         # Not Calico
-    outbound_type                   = "loadBalancer"
-    service_cidr                    = var.aks_cluster_service_cidr
-    dns_service_ip                  = var.aks_cluster_service_dns
-  }
-  identity {                                          # Managed Identity
-    type                            = "UserAssigned"
-    identity_ids                    = [ azurerm_user_assigned_identity.aks_cluster_identity.id ]
-  }
-  oms_agent {                                         # Container Insights
-    msi_auth_for_monitoring_enabled = true
-    log_analytics_workspace_id      = azurerm_log_analytics_workspace.aks_log_analytics.id
-  }
-  microsoft_defender {                                # Defender
-    log_analytics_workspace_id      = azurerm_log_analytics_workspace.aks_log_analytics.id
   }
   # ingress_application_gateway{
   #   gateway_id    - (Optional) The ID of the Application Gateway to integrate with the ingress controller of this Kubernetes Cluster. See this page for further details.
