@@ -39,6 +39,17 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   microsoft_defender {                                # Defender
     log_analytics_workspace_id      = azurerm_log_analytics_workspace.aks_log_analytics.id
   }
+  # ingress_application_gateway{
+  #   gateway_id    - (Optional) The ID of the Application Gateway to integrate with the ingress controller of this Kubernetes Cluster. See this page for further details.
+  #   subnet_id     - (Optional) The ID of the subnet on which to create an Application Gateway, which in turn will be integrated with the ingress controller of this Kubernetes Cluster. See this page for further details.
+  #   #gateway_name - (Optional) The name of the Application Gateway to be used or created in the Nodepool Resource Group, which in turn will be integrated with the ingress controller of this Kubernetes Cluster. See this page for further details.
+  #   #subnet_cidr  - (Optional) The subnet CIDR to be used to create an Application Gateway, which in turn will be integrated with the ingress controller of this Kubernetes Cluster. See this page for further details.
+  # }
+  # api_server_access_profile {
+  #   vnet_integration_enabled  = true # - (Optional) Should API Server VNet Integration be enabled? For more details please visit Use API Server VNet Integration.
+  #   subnet_id                 = azurerm_subnet.backend_service_subnet.id #(Optional) The ID of the Subnet where the API server endpoint is delegated to.
+  #   #authorized_ip_ranges - (Optional) Set of authorized IP ranges to allow access to API server, e.g. ["198.51.100.0/24"].
+  # }
   default_node_pool {
     vnet_subnet_id                  = azurerm_subnet.default_node_pool.id
     pod_subnet_id                   = azurerm_subnet.default_pod_pool.id
@@ -52,15 +63,4 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     max_pods                        = 32              # Restrictd by ratios of node/pod subnet sizes
     enable_auto_scaling             = true            # Scale for cost savings
   }
-  # ingress_application_gateway{
-  #   gateway_id    - (Optional) The ID of the Application Gateway to integrate with the ingress controller of this Kubernetes Cluster. See this page for further details.
-  #   subnet_id     - (Optional) The ID of the subnet on which to create an Application Gateway, which in turn will be integrated with the ingress controller of this Kubernetes Cluster. See this page for further details.
-  #   #gateway_name - (Optional) The name of the Application Gateway to be used or created in the Nodepool Resource Group, which in turn will be integrated with the ingress controller of this Kubernetes Cluster. See this page for further details.
-  #   #subnet_cidr  - (Optional) The subnet CIDR to be used to create an Application Gateway, which in turn will be integrated with the ingress controller of this Kubernetes Cluster. See this page for further details.
-  # }
-  # api_server_access_profile {
-  #   vnet_integration_enabled  = true # - (Optional) Should API Server VNet Integration be enabled? For more details please visit Use API Server VNet Integration.
-  #   subnet_id                 = azurerm_subnet.backend_service_subnet.id #(Optional) The ID of the Subnet where the API server endpoint is delegated to.
-  #   #authorized_ip_ranges - (Optional) Set of authorized IP ranges to allow access to API server, e.g. ["198.51.100.0/24"].
-  # }
 }
