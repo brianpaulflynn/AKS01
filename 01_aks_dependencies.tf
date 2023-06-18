@@ -7,7 +7,7 @@ resource "azurerm_resource_group" "aks_cluster_rg" {
 # Create Azure Log Analytics Workspace
 resource "azurerm_log_analytics_workspace" "aks_log_analytics" {
   location            = var.aks_location
-  resource_group_name = var.aks_cluster_rg
+  resource_group_name = azurerm_resource_group.aks_cluster_rg.name # #var.aks_cluster_rg
   sku                 = var.log_analytics_workspace_sku
   name                = "${var.aks_cluster_name}-analytics" #"aks-cluster-log-analytics"
 }
@@ -15,7 +15,7 @@ resource "azurerm_log_analytics_workspace" "aks_log_analytics" {
 # Define user assigned identities
 resource "azurerm_user_assigned_identity" "aks_cluster_identity" {
   location            = var.aks_location
-  resource_group_name = var.aks_cluster_rg
+  resource_group_name = azurerm_resource_group.aks_cluster_rg.name
   name                = "${var.aks_cluster_name}-identity" # "aks-cluster-identity"
 }
 
