@@ -24,10 +24,6 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     service_cidr                    = var.aks_config.aks_cluster_service_cidr
     dns_service_ip                  = var.aks_config.aks_cluster_service_dns
   }
-  workload_autoscaler_profile {                       # Keda autoscaler
-    keda_enabled                    = true
-    vertical_pod_autoscaler_enabled = true
-  }
   identity {                                          # Managed Identity
     type                            = "UserAssigned"
     identity_ids                    = [ azurerm_user_assigned_identity.aks_cluster_identity.id ]
@@ -50,6 +46,10 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   #   subnet_id                 = azurerm_subnet.backend_service_subnet.id #(Optional) The ID of the Subnet where the API server endpoint is delegated to.
   #   #authorized_ip_ranges - (Optional) Set of authorized IP ranges to allow access to API server, e.g. ["198.51.100.0/24"].
   # }
+  workload_autoscaler_profile {                       # Keda autoscaler
+    keda_enabled                    = true
+    vertical_pod_autoscaler_enabled = true
+  }
   default_node_pool {
     vnet_subnet_id                  = azurerm_subnet.aks_subnets["aks_default_node_pool"].id
     pod_subnet_id                   = azurerm_subnet.aks_subnets["aks_default_pod_pool"].id
