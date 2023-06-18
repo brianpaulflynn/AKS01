@@ -1,3 +1,15 @@
+variable "aks_cluster_default_node_pool_sku" {
+    type = string
+    default = "Standard_B2s"
+}
+variable "log_analytics_workspace_sku" {
+    type = string
+    default = "PerGB2018"
+}
+variable "aks_loadBalancer_type" {
+    type = string
+    default = "loadBalancer"
+}
 variable "aks_location" {
     type = string
     default = "eastus"
@@ -22,10 +34,6 @@ variable "aks_cluster_dns_prefix" {
     type = string 
     default = "aks-cluster-dns" 
 }
-variable "aks_cluster_vnet_cidr" {
-    type = string
-    default = "10.0.0.0/16"
-}
 variable "aks_cluster_service_cidr" {
     type = string
     default = "10.255.0.0/16"
@@ -34,25 +42,9 @@ variable "aks_cluster_service_dns" {
     type = string
     default = "10.255.0.4"
 }
-variable "aks_cluster_default_node_pool_sku" {
+variable "aks_cluster_vnet_cidr" {
     type = string
-    default = "Standard_B2s"
-}
-variable "log_analytics_workspace_sku" {
-    type = string
-    default = "PerGB2018"
-}
-variable "aks_loadBalancer_type" {
-    type = string
-    default = "loadBalancer"
-}
-variable "default_node_pool_subnets" {
-    type = list
-    default = ["10.0.1.0/24"]
-}
-variable "aks_firewall_subnets" {
-    type = list
-    default = ["10.0.0.0/24"]
+    default = "10.0.0.0/16"
 }
 variable "subnets_map" {
     type =  map(    object( {   

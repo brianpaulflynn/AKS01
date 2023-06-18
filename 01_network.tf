@@ -12,8 +12,7 @@ resource "azurerm_subnet" "aks_subnets" {
   resource_group_name   = azurerm_resource_group.aks_cluster_rg.name
   virtual_network_name  = azurerm_virtual_network.aks_vnet.name
 
-  # Grant cluster access to manage subnets
-  dynamic "delegation" {
+  dynamic "delegation" { # Grant cluster access to manage subnets
     for_each = var.subnets_map[each.key].service_delegation_name != null ? [var.subnets_map[each.key].service_delegation_name] : []
     content {
       name      = "${var.subnets_map[each.key].service_delegation_name}-delegation"

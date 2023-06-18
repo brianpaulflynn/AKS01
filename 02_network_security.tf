@@ -4,29 +4,9 @@ resource "azurerm_network_security_group" "aks_cluster_nsg" {
   resource_group_name           = azurerm_resource_group.aks_cluster_rg.name
   location                      = azurerm_resource_group.aks_cluster_rg.location
 }
-# Assign NSG to subnets ... write loop to add NSG to all subnets in the vnet
-resource "azurerm_subnet_network_security_group_association" "pod_subnet_1_nsg_association" {
-  subnet_id                     = azurerm_subnet.aks_subnets["aks_pod_subnet_1"].id
-  network_security_group_id     = azurerm_network_security_group.aks_cluster_nsg.id
-}
-resource "azurerm_subnet_network_security_group_association" "node_subnet_1_nsg_association" {
-  subnet_id                     = azurerm_subnet.aks_subnets["aks_node_subnet_1"].id
-  network_security_group_id     = azurerm_network_security_group.aks_cluster_nsg.id
-}
-resource "azurerm_subnet_network_security_group_association" "pod_subnet_2_nsg_association" {
-  subnet_id                     = azurerm_subnet.aks_subnets["aks_pod_subnet_2"].id
-  network_security_group_id     = azurerm_network_security_group.aks_cluster_nsg.id
-}
-resource "azurerm_subnet_network_security_group_association" "node_subnet_2_nsg_association" {
-  subnet_id                     = azurerm_subnet.aks_subnets["aks_node_subnet_2"].id
-  network_security_group_id     = azurerm_network_security_group.aks_cluster_nsg.id
-}
-resource "azurerm_subnet_network_security_group_association" "aks_firewall_subnet_nsg_association" {
-  subnet_id                     = azurerm_subnet.aks_subnets["aks_firewall_subnet"].id
-  network_security_group_id     = azurerm_network_security_group.aks_cluster_nsg.id
-}
-resource "azurerm_subnet_network_security_group_association" "backend_service_subnet_nsg_association" {
-  subnet_id                     = azurerm_subnet.aks_subnets["aks_backend_service_subnet"].id
+resource "azurerm_subnet_network_security_group_association" "subnets_nsg_association" {
+  for_each                      = var.subnets_map
+  subnet_id                     = azurerm_subnet.aks_subnets[each.key].id
   network_security_group_id     = azurerm_network_security_group.aks_cluster_nsg.id
 }
 # Define NSG rules
