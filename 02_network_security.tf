@@ -98,4 +98,3 @@ module "deny_pod_to_node_subnet" {
                                     var.aks_config.subnets_map["aks_node_subnet_2"].address_prefixes
                                 ) # ["10.0.120.0/21"]
 }
-
