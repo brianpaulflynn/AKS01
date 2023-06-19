@@ -1,9 +1,3 @@
-# Env vars
-variable "AD_GROUP_ID" { type  = string }
-# from module declaration
-variable "aks_managed_identity_ids" { type = list(string) }
-variable "aks_log_analytics_workspace_id" { type = string }
-variable "subnet_ids" { type = map(string)}
 variable "aks_config" {
     type    =   object( {
                         default_node_pool_sku               = string

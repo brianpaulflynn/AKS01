@@ -1,5 +1,23 @@
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
   # Locked In / Non-Configurable
+  identity {                                          # Managed Identity
+    type                            = "UserAssigned"
+    identity_ids                    = var.aks_managed_identity_ids
+  }
+  oms_agent {                                         # Container Insights
+    msi_auth_for_monitoring_enabled = true
+    log_analytics_workspace_id      = var.aks_log_analytics_workspace_id
+  }
+  microsoft_defender {                                # Defender
+    log_analytics_workspace_id      = var.aks_log_analytics_workspace_id
+  }
+  network_profile {                                   # CNI Networking
+    network_plugin                  = "azure"         # ...
+    network_policy                  = "azure"         # Not Calico
+    outbound_type                   = var.aks_config.loadBalancer_type
+    service_cidr                    = var.aks_config.service_cidr
+    dns_service_ip                  = var.aks_config.service_dns
+  }
   azure_policy_enabled              = true            # Best Practice
   open_service_mesh_enabled         = true            # Best Practice
   local_account_disabled            = true            # Best Practice. And required by AAD integration.
@@ -9,30 +27,6 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
      azure_rbac_enabled             = true            # with RBAC permissions granularity
      admin_group_object_ids         = [ var.AD_GROUP_ID ]  
   }                                                   # for some AAD group identifier
-  identity {                                          # Managed Identity
-    type                            = "UserAssigned"
-    identity_ids                    = var.aks_managed_identity_ids
-                                    # var.aks_config.managed_identity_id
-                                    # var.aks_managed_identity_id 
-                                    # var.aks_config.managed_identity_id
-                                    # [ azurerm_user_assigned_identity.aks_cluster_identity.id ]
-  }
-  network_profile {                                   # CNI Networking
-    network_plugin                  = "azure"         # ...
-    network_policy                  = "azure"         # Not Calico
-    outbound_type                   = var.aks_config.loadBalancer_type
-    service_cidr                    = var.aks_config.service_cidr
-    dns_service_ip                  = var.aks_config.service_dns
-  }
-  oms_agent {                                         # Container Insights
-    msi_auth_for_monitoring_enabled = true
-    log_analytics_workspace_id      = var.aks_log_analytics_workspace_id
-                                    #azurerm_log_analytics_workspace.aks_log_analytics.id
-  }
-  microsoft_defender {                                # Defender
-    log_analytics_workspace_id      = var.aks_log_analytics_workspace_id
-                                    #azurerm_log_analytics_workspace.aks_log_analytics.id
-  }
   # ingress_application_gateway{
   #   gateway_id    - (Optional) The ID of the Application Gateway to integrate with the ingress controller of this Kubernetes Cluster. See this page for further details.
   #   subnet_id     - (Optional) The ID of the subnet on which to create an Application Gateway, which in turn will be integrated with the ingress controller of this Kubernetes Cluster. See this page for further details.
@@ -51,9 +45,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   default_node_pool {
     # Locked In / Non-Configurable
     vnet_subnet_id                  = var.subnet_ids["aks_default_node_pool"]
-    #azurerm_subnet.aks_subnets["aks_default_node_pool"].id
     pod_subnet_id                   = var.subnet_ids["aks_default_pod_pool"]
-    # azurerm_subnet.aks_subnets["aks_default_pod_pool"].id
     only_critical_addons_enabled    = true  # Best Practice
     enable_auto_scaling             = true  # Scale for cost savings
     # # Configurable by module
@@ -61,17 +53,13 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     vm_size                         = var.aks_config.default_node_pool_sku
     name                            = var.aks_config.default_node_pool_name #"default"
     os_disk_size_gb                 = var.aks_config.default_node_pool_os_disk_size_gb  #= 30
-    min_count                       = var.aks_config.default_node_pool_os_disk_size_gb  #= 1
-    max_count                       = var.aks_config.default_node_pool_min_count        #= 3
+    min_count                       = var.aks_config.default_node_pool_min_count  #= 1
+    max_count                       = var.aks_config.default_node_pool_max_count        #= 3
     max_pods                        = var.aks_config.default_node_pool_max_pods         #= 32
   }
-  # Configurable by module, but done elsewhere
+  # Configurable by module
   location                          = var.aks_config.location
-                                    # var.aks_cluster_rg.aks_cluster_location
-                                    # azurerm_resource_group.aks_cluster_rg.location
   resource_group_name               = var.aks_config.rg
-                                    # var.aks_cluster_rg.aks_cluster_rg_name
-                                    # azurerm_resource_group.aks_cluster_rg.name
   name                              = var.aks_config.name
   node_resource_group               = var.aks_config.nodes_rg
   dns_prefix                        = var.aks_config.dns_prefix

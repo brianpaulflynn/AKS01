@@ -1,7 +1,4 @@
 variable "AD_GROUP_ID" { type  = string }
-
-
-
 variable "aks_config" {
     type    =   object( {
                         default_node_pool_sku               = string
@@ -38,9 +35,9 @@ variable "aks_config" {
                 )
     default =   {
         default_node_pool_sku               = "Standard_B2s"
-        log_analytics_workspace_sku     = "PerGB2018"
-        loadBalancer_type               = "loadBalancer"
-        location                        = "eastus"
+        log_analytics_workspace_sku         = "PerGB2018"
+        loadBalancer_type                   = "loadBalancer"
+        location                            = "eastus"
         rg                                  = "my_aks_rg"
         nodes_rg                            = "my_nodes_rg"
         name                                = "aks-cluster-name"
@@ -55,51 +52,51 @@ variable "aks_config" {
         default_node_pool_min_count         = 1
         default_node_pool_max_count         = 3
         default_node_pool_max_pods          = 32
-        run_command_enabled               = false   # Best Practice for Prodcution Servers
-        public_network_access_enabled     = false   # Best Practice Default
-        private_cluster_enabled           = true    # Best Practice Default
+        run_command_enabled                 = false   # Best Practice for Prodcution Servers
+        public_network_access_enabled       = false   # Best Practice Default
+        private_cluster_enabled             = true    # Best Practice Default
         aks_log_analytics_workspace_id      = null
         #AD_GROUP_ID = null
         subnets_map = {
             aks_default_node_pool = {
-                address_prefixes        = ["10.0.1.0/24"]
-                service_delegation_name = null
-                actions                 = null
+                address_prefixes            = ["10.0.1.0/24"]
+                service_delegation_name     = null
+                actions                     = null
             } ,
             aks_firewall_subnet = {   
-                address_prefixes        = ["10.0.0.0/24"]
-                service_delegation_name = "Microsoft.ContainerService/managedClusters"
-                actions                 = [ "Microsoft.Network/networkinterfaces/*" ]
+                address_prefixes            = ["10.0.0.0/24"]
+                service_delegation_name     = "Microsoft.ContainerService/managedClusters"
+                actions                     = [ "Microsoft.Network/networkinterfaces/*" ]
             } ,
             aks_backend_service_subnet = {
-                address_prefixes        = ["10.0.2.0/24"]
-                service_delegation_name = "Microsoft.ContainerService/managedClusters"
-                actions                 = [ "Microsoft.Network/networkinterfaces/*" ]
+                address_prefixes            = ["10.0.2.0/24"]
+                service_delegation_name     = "Microsoft.ContainerService/managedClusters"
+                actions                     = [ "Microsoft.Network/networkinterfaces/*" ]
             } ,
             aks_node_subnet_1 = {
-                address_prefixes        = ["10.0.124.0/27"]
-                service_delegation_name = "Microsoft.ContainerService/managedClusters"
-                actions                 = [ "Microsoft.Network/networkinterfaces/*" ]
+                address_prefixes            = ["10.0.124.0/27"]
+                service_delegation_name     = "Microsoft.ContainerService/managedClusters"
+                actions                     = [ "Microsoft.Network/networkinterfaces/*" ]
             } ,
             aks_node_subnet_2 = {
-                address_prefixes        = ["10.0.124.32/27"]
-                service_delegation_name = "Microsoft.ContainerService/managedClusters"
-                actions                 = [ "Microsoft.Network/networkinterfaces/*" ]
+                address_prefixes            = ["10.0.124.32/27"]
+                service_delegation_name     = "Microsoft.ContainerService/managedClusters"
+                actions                     = [ "Microsoft.Network/networkinterfaces/*" ]
             } ,
             aks_default_pod_pool = {
-                address_prefixes        = ["10.0.128.0/22"]
-                service_delegation_name = "Microsoft.ContainerService/managedClusters"
-                actions                 = [ "Microsoft.Network/networkinterfaces/*" ]
+                address_prefixes            = ["10.0.128.0/22"]
+                service_delegation_name     = "Microsoft.ContainerService/managedClusters"
+                actions                     = [ "Microsoft.Network/networkinterfaces/*" ]
             } ,
             aks_pod_subnet_1 = {
-                address_prefixes        = ["10.0.132.0/22"]
-                service_delegation_name = "Microsoft.ContainerService/managedClusters"
-                actions                 = [ "Microsoft.Network/networkinterfaces/*" ]
+                address_prefixes            = ["10.0.132.0/22"]
+                service_delegation_name     = "Microsoft.ContainerService/managedClusters"
+                actions                     = [ "Microsoft.Network/networkinterfaces/*" ]
             } ,
             aks_pod_subnet_2 = {
-                address_prefixes        = ["10.0.136.0/22"]
-                service_delegation_name = "Microsoft.ContainerService/managedClusters"
-                actions                 = [ "Microsoft.Network/networkinterfaces/*" ]
+                address_prefixes            = ["10.0.136.0/22"]
+                service_delegation_name     = "Microsoft.ContainerService/managedClusters"
+                actions                     = [ "Microsoft.Network/networkinterfaces/*" ]
             } ,
         }
     } 
