@@ -1,7 +1,7 @@
 variable "AD_GROUP_ID" { type  = string }
-
-
-
+variable "aks_managed_identity_ids" { type = list(string) }
+variable "subnet_ids" { type = map(string)}
+variable "aks_log_analytics_workspace_id" { type = string }
 variable "aks_config" {
     type    =   object( {
                         default_node_pool_sku               = string
@@ -16,7 +16,7 @@ variable "aks_config" {
                         service_cidr                        = string
                         service_dns                         = string
                         vnet_cidr                           = string
-                        default_node_pool_zones             = list(string)
+                        default_node_pool_zones            = list(string)
                         default_node_pool_name              = string
                         default_node_pool_os_disk_size_gb   = string
                         default_node_pool_min_count         = string
@@ -26,7 +26,7 @@ variable "aks_config" {
                         public_network_access_enabled       = string
                         private_cluster_enabled             = string
                         aks_log_analytics_workspace_id      = string
-                        #AD_GROUP_ID = string
+                        #AD_GROUP_ID                         = string
                         subnets_map =   map(    object( {   
                                                     address_prefixes        = list(string)
                                                     service_delegation_name = optional(string)
@@ -59,7 +59,7 @@ variable "aks_config" {
         public_network_access_enabled     = false   # Best Practice Default
         private_cluster_enabled           = true    # Best Practice Default
         aks_log_analytics_workspace_id      = null
-        #AD_GROUP_ID = null
+        #AD_GROUP_ID                         = null
         subnets_map = {
             aks_default_node_pool = {
                 address_prefixes        = ["10.0.1.0/24"]

@@ -1,6 +1,6 @@
 # Define the AKS network security group (NSG)
 resource "azurerm_network_security_group" "aks_cluster_nsg" {
-  name                          = "${var.aks_config.aks_cluster_name}-nsg"
+  name                          = "${var.aks_config.name}-nsg"
   resource_group_name           = azurerm_resource_group.aks_cluster_rg.name
   location                      = azurerm_resource_group.aks_cluster_rg.location
 }

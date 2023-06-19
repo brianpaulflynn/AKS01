@@ -1,9 +1,9 @@
 # Define the virtual network and subnets for AKS
 resource "azurerm_virtual_network" "aks_vnet" {
   resource_group_name   = azurerm_resource_group.aks_cluster_rg.name #var.aks_cluster_rg
-  location              = var.aks_config.aks_location
-  name                  = var.aks_config.aks_cluster_vnet_name
-  address_space         = [ var.aks_config.aks_cluster_vnet_cidr ]
+  location              = azurerm_resource_group.aks_cluster_rg.location # var.aks_config.location
+  name                  = var.aks_config.vnet_name
+  address_space         = [ var.aks_config.vnet_cidr ]
 }
 resource "azurerm_subnet" "aks_subnets" {
   for_each              = var.aks_config.subnets_map
@@ -22,3 +22,9 @@ resource "azurerm_subnet" "aks_subnets" {
     }
   }
 } 
+locals {
+  subnet_ids = { for subnet_name, subnet in azurerm_subnet.aks_subnets : subnet_name => subnet.id }
+}
+output "subnet_ids" {
+  value = local.subnet_ids
+}
