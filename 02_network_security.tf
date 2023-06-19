@@ -6,14 +6,7 @@ resource "azurerm_network_security_group" "aks_cluster_nsg" {
 }
 resource "azurerm_subnet_network_security_group_association" "subnets_nsg_association" {
   for_each                      = var.aks_config.subnets_map
-
-
-
-  subnet_id                     = module.aks_subnets.subnet_ids[each.key]
-                                  # azurerm_subnet.aks_subnets[each.key].id
-  
-  
-  
+  subnet_id                     = module.aks_subnets.subnet_ids[each.key]     # azurerm_subnet.aks_subnets[each.key].id
   network_security_group_id     = azurerm_network_security_group.aks_cluster_nsg.id
 }
 # Define NSG rules

@@ -1,3 +1,9 @@
+variable "resource_group_name" {
+    type    = string
+}
+variable "virtual_network_name" {
+    type    = string
+}
 variable "aks_config" {
     type    =   object( {
                         default_node_pool_sku               = string

@@ -7,6 +7,8 @@ module "vnet" {
   address_space         = [ var.aks_config.vnet_cidr ]
 }
 module "aks_subnets" {
+  resource_group_name   = azurerm_resource_group.aks_cluster_rg.name 
+  virtual_network_name  = var.aks_config.vnet_name
   source = "./modules/subnet"
   #subnet_ids = var.aks_config.
 }
