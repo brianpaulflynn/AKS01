@@ -1,5 +1,7 @@
 # Define the AKS network security group (NSG)
-resource "azurerm_network_security_group" "aks_cluster_nsg" {
+#resource "azurerm_network_security_group" "aks_nsg" {
+module "aks_nsg" {
+  source = "./modules/nsg"
   name                          = "${var.aks_config.name}-nsg"
   resource_group_name           = azurerm_resource_group.aks_cluster_rg.name
   location                      = azurerm_resource_group.aks_cluster_rg.location
@@ -7,13 +9,15 @@ resource "azurerm_network_security_group" "aks_cluster_nsg" {
 resource "azurerm_subnet_network_security_group_association" "subnets_nsg_association" {
   for_each                      = var.aks_config.subnets_map
   subnet_id                     = module.aks_subnets.subnet_ids[each.key]
-  network_security_group_id     = azurerm_network_security_group.aks_cluster_nsg.id
+  network_security_group_id     = module.aks_nsg.network_security_group_id
+                                  # module.aks_nsg.aks_nsg_id
 }
 # Define NSG rules
 resource "azurerm_network_security_rule" "allow_pod_subnet_outbound" {
   name                          = "pod-subnet-outbound"
   resource_group_name           = azurerm_resource_group.aks_cluster_rg.name
-  network_security_group_name   = azurerm_network_security_group.aks_cluster_nsg.name
+  network_security_group_name   = module.aks_nsg.network_security_group_name
+                                  #var.network_security_group_name
   priority                      = 100
   direction                     = "Outbound"
   access                        = "Allow"
@@ -29,7 +33,7 @@ resource "azurerm_network_security_rule" "allow_pod_subnet_outbound" {
 resource "azurerm_network_security_rule" "allow_pod_to_pod" {
   name                          = "pod-to-pod-inbound"
   resource_group_name           = azurerm_resource_group.aks_cluster_rg.name
-  network_security_group_name   = azurerm_network_security_group.aks_cluster_nsg.name
+  network_security_group_name   = module.aks_nsg.network_security_group_name # var.network_security_group_name
   priority                      = 100
   direction                     = "Inbound"
   access                        = "Allow"
@@ -48,7 +52,7 @@ resource "azurerm_network_security_rule" "allow_pod_to_pod" {
 resource "azurerm_network_security_rule" "deny_node_to_pod_subnet" {
   name                          = "deny-node-to-pod-subnet"
   resource_group_name           = azurerm_resource_group.aks_cluster_rg.name
-  network_security_group_name   = azurerm_network_security_group.aks_cluster_nsg.name
+  network_security_group_name   = module.aks_nsg.network_security_group_name # var.network_security_group_name
   priority                      = 101
   direction                     = "Inbound"
   access                        = "Deny"
@@ -67,7 +71,8 @@ resource "azurerm_network_security_rule" "deny_node_to_pod_subnet" {
 resource "azurerm_network_security_rule" "deny_pod_to_node_subnet" {
   name                          = "deny-pod-to-node-subnet"
   resource_group_name           = azurerm_resource_group.aks_cluster_rg.name
-  network_security_group_name   = azurerm_network_security_group.aks_cluster_nsg.name
+  network_security_group_name   = module.aks_nsg.network_security_group_name
+                                  # var.network_security_group_name
   priority                      = 102
   direction                     = "Inbound"
   access                        = "Deny"
@@ -86,7 +91,7 @@ resource "azurerm_network_security_rule" "deny_pod_to_node_subnet" {
 # resource "azurerm_network_security_rule" "deny_node_subnet_egress" {
 #   name                          = "deny-node-subnet-egress"
 #   resource_group_name           = azurerm_resource_group.aks_cluster_rg.name
-#   network_security_group_name   = azurerm_network_security_group.aks_cluster_nsg.name
+#   network_security_group_name   = var.network_security_group_name
 #   priority                      = 103
 #   direction                     = "Outbound"
 #   access                        = "Deny"
