@@ -1,4 +1,3 @@
-# Create Azure Log Analytics Workspace
 resource "azurerm_log_analytics_workspace" "this" {
   location            = var.location # var.aks_config.location
   sku                 = var.sku # var.aks_config.log_analytics_workspace_sku
