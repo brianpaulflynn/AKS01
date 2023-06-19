@@ -1,4 +1,3 @@
-
 # Define the virtual network and subnets for AKS
 variable "my_service_cidr" {
     type = string

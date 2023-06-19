@@ -41,8 +41,8 @@ resource "azurerm_network_security_rule" "allow_pod_subnet_outbound" {
   source_port_range             = "*"
   destination_port_range        = "*"
   source_address_prefixes       = concat( 
-                                  azurerm_subnet.pod_subnet_1.address_prefixes,
-                                  azurerm_subnet.pod_subnet_2.address_prefixes
+                                    azurerm_subnet.pod_subnet_1.address_prefixes,
+                                    azurerm_subnet.pod_subnet_2.address_prefixes
                                 ) #["10.0.128.0/17"]
   destination_address_prefixes  = ["0.0.0.0/0"]
 }
