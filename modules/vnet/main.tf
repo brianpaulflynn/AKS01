@@ -4,3 +4,6 @@ resource "azurerm_virtual_network" "aks_vnet" {
   name                  = var.name
   address_space         = var.address_space
 }
+output "vnet_name" {
+  value =  azurerm_virtual_network.aks_vnet.name
+}

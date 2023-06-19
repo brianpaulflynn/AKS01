@@ -1,5 +1,5 @@
 # Define the virtual network and subnets for AKS
-module "vnet" {
+module "aks_vnet" {
   source = "./modules/vnet"
   resource_group_name   = azurerm_resource_group.aks_cluster_rg.name 
   location              = azurerm_resource_group.aks_cluster_rg.location 
@@ -8,7 +8,16 @@ module "vnet" {
 }
 module "aks_subnets" {
   resource_group_name   = azurerm_resource_group.aks_cluster_rg.name 
-  virtual_network_name  = var.aks_config.vnet_name
+
+
+
+  virtual_network_name  = module.aks_vnet.vnet_name
+                          # module.aks_subnets.subnet_ids
+
+                          # module.aks_vnet.name
+                          # var.aks_config.vnet_name
+
+
   source = "./modules/subnet"
   #subnet_ids = var.aks_config.
 }
