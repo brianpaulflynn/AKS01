@@ -32,7 +32,6 @@ module "allow_pod_subnet_outbound" {
                                 ) #["10.0.128.0/17"]
   destination_address_prefixes  = ["0.0.0.0/0"]
 }
-#resource "azurerm_network_security_rule" "allow_pod_to_pod" {
 module "allow_pod_to_pod" {
   source                        = "./modules/nsr"
   subnets_map                 = var.aks_config.subnets_map
@@ -55,7 +54,6 @@ module "allow_pod_to_pod" {
                                     var.aks_config.subnets_map["aks_pod_subnet_2"].address_prefixes
                                 ) # ["10.0.128.0/17"]
 }
-#resource "azurerm_network_security_rule" "deny_node_to_pod_subnet" {
 module "deny_node_to_pod_subnet" {
   source                        = "./modules/nsr"
   subnets_map                 = var.aks_config.subnets_map
@@ -78,7 +76,6 @@ module "deny_node_to_pod_subnet" {
                                     var.aks_config.subnets_map["aks_pod_subnet_2"].address_prefixes
                                 ) # ["10.0.128.0/17"]
 }
-#resource "azurerm_network_security_rule" "deny_pod_to_node_subnet" {
 module "deny_pod_to_node_subnet" {
   source                        = "./modules/nsr"
   subnets_map                 = var.aks_config.subnets_map
