@@ -3,8 +3,8 @@
 module "aks_nsg" {
   source                = "./modules/nsg"
   name                  = "${var.aks_config.name}-nsg"
-  resource_group_name   = azurerm_resource_group.aks_cluster_rg.name
-  location              = azurerm_resource_group.aks_cluster_rg.location
+  resource_group_name   = module.aks_cluster_rg.rg_name #azurerm_resource_group.aks_cluster_rg.name
+  location              = module.aks_cluster_rg.rg_location #azurerm_resource_group.aks_cluster_rg.location
 }
 module "subnets_nsg_association" {
   source                      = "./modules/nsga"
@@ -18,7 +18,7 @@ module "allow_pod_subnet_outbound" {
   source                        = "./modules/nsr"
   subnets_map                 = var.aks_config.subnets_map
   name                          = "pod-subnet-outbound"
-  resource_group_name           = azurerm_resource_group.aks_cluster_rg.name
+  resource_group_name           = module.aks_cluster_rg.rg_name #azurerm_resource_group.aks_cluster_rg.name
   network_security_group_name   = module.aks_nsg.network_security_group_name
   priority                      = 100
   direction                     = "Outbound"
@@ -37,7 +37,7 @@ module "allow_pod_to_pod" {
   subnets_map                 = var.aks_config.subnets_map
 
   name                          = "pod-to-pod-inbound"
-  resource_group_name           = azurerm_resource_group.aks_cluster_rg.name
+  resource_group_name           = module.aks_cluster_rg.rg_name #azurerm_resource_group.aks_cluster_rg.name
   network_security_group_name   = module.aks_nsg.network_security_group_name # var.network_security_group_name
   priority                      = 100
   direction                     = "Inbound"
@@ -59,7 +59,7 @@ module "deny_node_to_pod_subnet" {
   subnets_map                 = var.aks_config.subnets_map
 
    name                          = "deny-node-to-pod-subnet"
-  resource_group_name           = azurerm_resource_group.aks_cluster_rg.name
+  resource_group_name           = module.aks_cluster_rg.rg_name #azurerm_resource_group.aks_cluster_rg.name
   network_security_group_name   = module.aks_nsg.network_security_group_name # var.network_security_group_name
   priority                      = 101
   direction                     = "Inbound"
@@ -81,7 +81,7 @@ module "deny_pod_to_node_subnet" {
   subnets_map                 = var.aks_config.subnets_map
 
   name                          = "deny-pod-to-node-subnet"
-  resource_group_name           = azurerm_resource_group.aks_cluster_rg.name
+  resource_group_name           = module.aks_cluster_rg.rg_name #azurerm_resource_group.aks_cluster_rg.name
   network_security_group_name   = module.aks_nsg.network_security_group_name
   priority                      = 102
   direction                     = "Inbound"

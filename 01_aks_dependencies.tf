@@ -1,13 +1,11 @@
 # Define the resource group
-resource "azurerm_resource_group" "aks_cluster_rg" {
-  location            = var.aks_config.location
-  name                = var.aks_config.rg
-}
-output "aks_cluster_rg_name" {
-  value = azurerm_resource_group.aks_cluster_rg.name
-}
-output "aks_cluster_location" {
-  value = azurerm_resource_group.aks_cluster_rg.location
+# resource "azurerm_resource_group" "aks_cluster_rg" {
+
+# }
+module "aks_cluster_rg" {
+  source = "./modules/rg"
+   location            = var.aks_config.location
+   name                = var.aks_config.rg
 }
 
 # # Create Azure Log Analytics Workspace
@@ -16,21 +14,13 @@ module "aks_log_analytics" {
   location            = var.aks_config.location
   sku                 = var.aks_config.log_analytics_workspace_sku
   name                = "${var.aks_config.name}-analytics" #"aks-cluster-log-analytics"
-  resource_group_name = azurerm_resource_group.aks_cluster_rg.name # #var.aks_cluster_rg
+  resource_group_name = module.aks_cluster_rg.rg_name
+                        # azurerm_resource_group.aks_cluster_rg.name # #var.aks_cluster_rg
 }
-# resource "azurerm_log_analytics_workspace" "aks_log_analytics" {
-#   location            = var.aks_config.location
-#   sku                 = var.aks_config.log_analytics_workspace_sku
-#   name                = "${var.aks_config.name}-analytics" #"aks-cluster-log-analytics"
-#   resource_group_name = azurerm_resource_group.aks_cluster_rg.name # #var.aks_cluster_rg
-# }
-# output "aks_log_analytics_workspace_id" {
-#   value = azurerm_log_analytics_workspace.aks_log_analytics.id
-# }
 
 module "aks_cluster_identity" {
   source = "./modules/user_assigned_identity"
   location            = var.aks_config.location
   name                = "${var.aks_config.name}-identity" # "aks-cluster-identity"
-  resource_group_name = azurerm_resource_group.aks_cluster_rg.name
+  resource_group_name = module.aks_cluster_rg.rg_name # azurerm_resource_group.aks_cluster_rg.name
   }
