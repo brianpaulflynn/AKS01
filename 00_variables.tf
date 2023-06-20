@@ -23,7 +23,6 @@ variable "aks_config" {
     public_network_access_enabled     = string
     private_cluster_enabled           = string
     aks_log_analytics_workspace_id    = string
-    #AD_GROUP_ID = string
     subnets_map = map(object({
       address_prefixes        = list(string)
       service_delegation_name = optional(string)
