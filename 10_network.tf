@@ -63,7 +63,7 @@ module "allow_pod_to_pod" {
   destination_address_prefixes = concat(
     var.aks_config.subnets_map["aks_pod_subnet_1"].address_prefixes,
     var.aks_config.subnets_map["aks_pod_subnet_2"].address_prefixes
-  ) # ["10.0.128.0/17"]
+  ) 
 }
 module "deny_node_to_pod_subnet" {
   source                      = "./modules/nsr"
