@@ -5,11 +5,11 @@ resource "azurerm_kubernetes_cluster_node_pool" "node_pool_1" {
   pod_subnet_id         = azurerm_subnet.pod_subnet_1.id
   name                  = "pool1"
   vm_size               = "Standard_B2s"
+  os_disk_size_gb       = 30
   zones                 = [ 1 , 2 , 3 ]
   min_count             = 1
   max_count             = 3
   max_pods              = 32
-  os_disk_size_gb       = 30
   enable_auto_scaling   = true
   tags = {
     Environment         = "Pool1Tag"
@@ -22,11 +22,11 @@ resource "azurerm_kubernetes_cluster_node_pool" "node_pool_2" {
   pod_subnet_id         = azurerm_subnet.pod_subnet_2.id
   name                  = "pool2"
   vm_size               = "Standard_B2s"
+  os_disk_size_gb       = 30
   zones                 = [ 1 , 2 , 3 ]
   min_count             = 1
   max_count             = 3
   max_pods              = 32
-  os_disk_size_gb       = 30
   enable_auto_scaling   = true
   tags = {
     Environment         = "Pool2Tag"
