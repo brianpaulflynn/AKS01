@@ -4,7 +4,7 @@ module "aks_cluster_rg" {
   location = var.aks_config.location
   name     = var.aks_config.rg
 }
-# # Create Azure Log Analytics Workspace
+# Create Azure Log Analytics Workspace
 module "aks_log_analytics" {
   source              = "./modules/log_analytics_workspace"
   location            = var.aks_config.location
