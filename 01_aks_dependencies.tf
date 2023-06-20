@@ -11,7 +11,6 @@ module "aks_log_analytics" {
   sku                 = var.aks_config.log_analytics_workspace_sku
   name                = "${var.aks_config.name}-analytics" #"aks-cluster-log-analytics"
   resource_group_name = module.aks_cluster_rg.rg_name
-                        # azurerm_resource_group.aks_cluster_rg.name # #var.aks_cluster_rg
 }
 # Create aks cluster identity
 module "aks_cluster_identity" {
