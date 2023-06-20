@@ -12,5 +12,5 @@ resource "azurerm_network_security_rule" "this" {
                                     var.aks_config.subnets_map["aks_pod_subnet_1"].address_prefixes,
                                     var.aks_config.subnets_map["aks_pod_subnet_2"].address_prefixes
                                 ) 
-  destination_address_prefixes  = ["0.0.0.0/0"]
+  destination_address_prefixes  = var.destination_address_prefixes
 }
