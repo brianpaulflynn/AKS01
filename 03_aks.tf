@@ -1,6 +1,6 @@
 # Define AKS Cluster
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
-  location                          = var.aks_config.aks_location
+  location                          = azurerm_resource_group.aks_cluster_rg.location #var.aks_location
   resource_group_name               = azurerm_resource_group.aks_cluster_rg.name #var.aks_cluster_rg
   name                              = var.aks_config.aks_cluster_name
   node_resource_group               = var.aks_config.aks_nodes_rg
@@ -17,20 +17,16 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
      azure_rbac_enabled             = true            # with RBAC permissions granularity
      admin_group_object_ids         = [ var.AD_GROUP_ID ]  
   }                                                   # for some AAD group identifier
+  identity {                                          # Managed Identity
+    type                            = "UserAssigned"
+    identity_ids                    = [ azurerm_user_assigned_identity.aks_cluster_identity.id ]
+  }
   network_profile {                                   # CNI Networking
     network_plugin                  = "azure"         # ...
     network_policy                  = "azure"         # Not Calico
     outbound_type                   = var.aks_config.aks_loadBalancer_type
     service_cidr                    = var.aks_config.aks_cluster_service_cidr
     dns_service_ip                  = var.aks_config.aks_cluster_service_dns
-  }
-  workload_autoscaler_profile {                       # Keda autoscaler
-    keda_enabled                    = true
-    vertical_pod_autoscaler_enabled = true
-  }
-  identity {                                          # Managed Identity
-    type                            = "UserAssigned"
-    identity_ids                    = [ azurerm_user_assigned_identity.aks_cluster_identity.id ]
   }
   oms_agent {                                         # Container Insights
     msi_auth_for_monitoring_enabled = true
@@ -50,6 +46,10 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   #   subnet_id                 = azurerm_subnet.backend_service_subnet.id #(Optional) The ID of the Subnet where the API server endpoint is delegated to.
   #   #authorized_ip_ranges - (Optional) Set of authorized IP ranges to allow access to API server, e.g. ["198.51.100.0/24"].
   # }
+  workload_autoscaler_profile {                       # Keda autoscaler
+    keda_enabled                    = true
+    vertical_pod_autoscaler_enabled = true
+  }
   default_node_pool {
     vnet_subnet_id                  = azurerm_subnet.aks_subnets["aks_default_node_pool"].id
     pod_subnet_id                   = azurerm_subnet.aks_subnets["aks_default_pod_pool"].id

@@ -3,10 +3,7 @@ resource "azurerm_resource_group" "aks_cluster_rg" {
   location            = var.aks_config.aks_location
   name                = var.aks_config.aks_cluster_rg
 }
-      # service_delegation {
-      #   name    = var.aks_config.subnets_map[each.key].service_delegation_name
-      #   actions = var.aks_config.subnets_map[each.key].actions
-      # }
+
 # Create Azure Log Analytics Workspace
 resource "azurerm_log_analytics_workspace" "aks_log_analytics" {
   location            = var.aks_config.aks_location

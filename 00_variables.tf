@@ -1,5 +1,5 @@
 variable "aks_config" {
-    type    =   object({
+    type    =   object( {
                         aks_cluster_default_node_pool_sku   = string
                         log_analytics_workspace_sku         = string
                         aks_loadBalancer_type               = string
@@ -18,9 +18,9 @@ variable "aks_config" {
                                                     actions                 = optional(list(string))
                                                     }
                                                 )
-                                            )
-                        }
-                    )
+                                        )
+                    }
+                )
     default =   {
         aks_cluster_default_node_pool_sku   = "Standard_B2s"
         log_analytics_workspace_sku         = "PerGB2018"
