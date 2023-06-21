@@ -1,6 +1,6 @@
 # Define AKS Cluster
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
-  location                          = azurerm_resource_group.aks_cluster_rg.location
+  location                          = var.aks_location
   resource_group_name               = var.aks_cluster_rg
   name                              = var.aks_cluster_name
   node_resource_group               = var.aks_nodes_rg
@@ -18,9 +18,9 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
      admin_group_object_ids         = [ var.AD_GROUP_ID ]  
   }                                                   # for some AAD group identifier
   network_profile {                                   # CNI Networking
-    network_plugin                  = "azure"
+    network_plugin                  = "azure"         # ...
     network_policy                  = "azure"         # Not Calico
-    outbound_type                   = "loadBalancer"
+    outbound_type                   = var.aks_loadBalancer_type
     service_cidr                    = var.aks_cluster_service_cidr
     dns_service_ip                  = var.aks_cluster_service_dns
   }
@@ -39,19 +39,6 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   microsoft_defender {                                # Defender
     log_analytics_workspace_id      = azurerm_log_analytics_workspace.aks_log_analytics.id
   }
-  default_node_pool {
-    vnet_subnet_id                  = azurerm_subnet.default_node_pool.id
-    pod_subnet_id                   = azurerm_subnet.default_pod_pool.id
-    vm_size                         = var.aks_cluster_default_node_pool_sku
-    only_critical_addons_enabled    = true            # Best Practice
-    name                            = "default"
-    os_disk_size_gb                 = 30
-    zones                           = [ 1 , 2 , 3 ]   # Use all 3 AZ for max SLA
-    min_count                       = 1               # Scale down very small when unneeded.
-    max_count                       = 3               # Set max scale up to prevent runaway scaling
-    max_pods                        = 32              # Restrictd by ratios of node/pod subnet sizes
-    enable_auto_scaling             = true            # Scale for cost savings
-  }
   # ingress_application_gateway{
   #   gateway_id    - (Optional) The ID of the Application Gateway to integrate with the ingress controller of this Kubernetes Cluster. See this page for further details.
   #   subnet_id     - (Optional) The ID of the subnet on which to create an Application Gateway, which in turn will be integrated with the ingress controller of this Kubernetes Cluster. See this page for further details.
@@ -63,4 +50,17 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   #   subnet_id                 = azurerm_subnet.backend_service_subnet.id #(Optional) The ID of the Subnet where the API server endpoint is delegated to.
   #   #authorized_ip_ranges - (Optional) Set of authorized IP ranges to allow access to API server, e.g. ["198.51.100.0/24"].
   # }
+  default_node_pool {
+    vnet_subnet_id                  = azurerm_subnet.aks_subnets["aks_default_node_pool"].id
+    pod_subnet_id                   = azurerm_subnet.aks_subnets["aks_default_pod_pool"].id
+    vm_size                         = var.aks_cluster_default_node_pool_sku
+    only_critical_addons_enabled    = true            # Best Practice
+    name                            = "default"
+    os_disk_size_gb                 = 30
+    zones                           = [ 1 , 2 , 3 ]   # Use all 3 AZ for max SLA
+    min_count                       = 1               # Scale down very small when unneeded.
+    max_count                       = 3               # Set max scale up to prevent runaway scaling
+    max_pods                        = 32              # Restrictd by ratios of node/pod subnet sizes
+    enable_auto_scaling             = true            # Scale for cost savings
+  }
 }

@@ -3,6 +3,7 @@ resource "azurerm_resource_group" "aks_cluster_rg" {
   name     = var.aks_cluster_rg
   location = var.aks_location
 }
+
 # Create Azure Log Analytics Workspace
 resource "azurerm_log_analytics_workspace" "aks_log_analytics" {
   location            = azurerm_resource_group.aks_cluster_rg.location
