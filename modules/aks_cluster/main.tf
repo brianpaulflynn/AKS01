@@ -67,3 +67,6 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   public_network_access_enabled     = var.aks_config.public_network_access_enabled # false # Best Practice Default
   private_cluster_enabled           = var.aks_config.private_cluster_enabled # true  # Best Practice Default
 }
+output "aks_cluster_id"{
+  value = azurerm_kubernetes_cluster.aks_cluster.id
+}
