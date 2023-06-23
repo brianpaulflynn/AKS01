@@ -1,6 +1,6 @@
 resource "azurerm_resource_group" "this" {
-  location  = var.location # var.aks_config.location
-  name      = var.name # var.aks_config.rg
+  location  = var.location 
+  name      = var.name 
 }
 output "rg_name" {
     value = azurerm_resource_group.this.name

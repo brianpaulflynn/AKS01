@@ -20,5 +20,4 @@ locals {
 }
 output "subnet_ids" {
   value =  { for subnet_name, subnet in azurerm_subnet.aks_subnets : subnet_name => subnet.id }
-            # local.subnet_ids
 }

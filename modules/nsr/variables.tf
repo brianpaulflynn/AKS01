@@ -66,7 +66,6 @@ variable "aks_config" {
         public_network_access_enabled       = false   # Best Practice Default
         private_cluster_enabled             = true    # Best Practice Default
         aks_log_analytics_workspace_id      = null
-        #AD_GROUP_ID = null
         subnets_map = {
             aks_default_node_pool = {
                 address_prefixes            = ["10.0.1.0/24"]
