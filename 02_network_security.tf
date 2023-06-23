@@ -1,12 +1,12 @@
 # Define the AKS network security group (NSG)
 resource "azurerm_network_security_group" "aks_cluster_nsg" {
-  name                          = "${var.aks_config.aks_cluster_name}-nsg"
+  name                          = "${var.aks_config.name}-nsg"
   resource_group_name           = azurerm_resource_group.aks_cluster_rg.name
   location                      = azurerm_resource_group.aks_cluster_rg.location
 }
 resource "azurerm_subnet_network_security_group_association" "subnets_nsg_association" {
   for_each                      = var.aks_config.subnets_map
-  subnet_id                     = azurerm_subnet.aks_subnets[each.key].id
+  subnet_id                     = module.aks_subnets.subnet_ids[each.key]     # azurerm_subnet.aks_subnets[each.key].id
   network_security_group_id     = azurerm_network_security_group.aks_cluster_nsg.id
 }
 # Define NSG rules
@@ -21,8 +21,8 @@ resource "azurerm_network_security_rule" "allow_pod_subnet_outbound" {
   source_port_range             = "*"
   destination_port_range        = "*"
   source_address_prefixes       = concat( 
-                                    azurerm_subnet.aks_subnets["aks_pod_subnet_1"].address_prefixes,
-                                    azurerm_subnet.aks_subnets["aks_pod_subnet_2"].address_prefixes
+                                    var.aks_config.subnets_map["aks_pod_subnet_1"].address_prefixes,
+                                    var.aks_config.subnets_map["aks_pod_subnet_2"].address_prefixes
                                 ) #["10.0.128.0/17"]
   destination_address_prefixes  = ["0.0.0.0/0"]
 }
@@ -37,12 +37,12 @@ resource "azurerm_network_security_rule" "allow_pod_to_pod" {
   source_port_range             = "*"
   destination_port_range        = "*"
   source_address_prefixes       = concat( 
-                                    azurerm_subnet.aks_subnets["aks_pod_subnet_1"].address_prefixes,
-                                    azurerm_subnet.aks_subnets["aks_pod_subnet_2"].address_prefixes
+                                    var.aks_config.subnets_map["aks_pod_subnet_1"].address_prefixes,
+                                    var.aks_config.subnets_map["aks_pod_subnet_2"].address_prefixes
                                 )
   destination_address_prefixes  = concat (  
-                                    azurerm_subnet.aks_subnets["aks_pod_subnet_1"].address_prefixes,
-                                    azurerm_subnet.aks_subnets["aks_pod_subnet_2"].address_prefixes
+                                    var.aks_config.subnets_map["aks_pod_subnet_1"].address_prefixes,
+                                    var.aks_config.subnets_map["aks_pod_subnet_2"].address_prefixes
                                 ) # ["10.0.128.0/17"]
 }
 resource "azurerm_network_security_rule" "deny_node_to_pod_subnet" {
@@ -56,12 +56,12 @@ resource "azurerm_network_security_rule" "deny_node_to_pod_subnet" {
   source_port_range             = "*"
   destination_port_range        = "*"
   source_address_prefixes       = concat( 
-                                    azurerm_subnet.aks_subnets["aks_node_subnet_1"].address_prefixes,
-                                    azurerm_subnet.aks_subnets["aks_node_subnet_2"].address_prefixes
+                                    var.aks_config.subnets_map["aks_node_subnet_1"].address_prefixes,
+                                    var.aks_config.subnets_map["aks_node_subnet_2"].address_prefixes
                                 ) # ["10.0.120.0/21"]
   destination_address_prefixes  = concat( 
-                                    azurerm_subnet.aks_subnets["aks_pod_subnet_1"].address_prefixes,
-                                    azurerm_subnet.aks_subnets["aks_pod_subnet_2"].address_prefixes
+                                    var.aks_config.subnets_map["aks_pod_subnet_1"].address_prefixes,
+                                    var.aks_config.subnets_map["aks_pod_subnet_2"].address_prefixes
                                 ) # ["10.0.128.0/17"]
 }
 resource "azurerm_network_security_rule" "deny_pod_to_node_subnet" {
@@ -75,12 +75,12 @@ resource "azurerm_network_security_rule" "deny_pod_to_node_subnet" {
   source_port_range             = "*"
   destination_port_range        = "*"
   source_address_prefixes       = concat( 
-                                    azurerm_subnet.aks_subnets["aks_pod_subnet_1"].address_prefixes,
-                                    azurerm_subnet.aks_subnets["aks_pod_subnet_2"].address_prefixes
+                                    var.aks_config.subnets_map["aks_pod_subnet_1"].address_prefixes,
+                                    var.aks_config.subnets_map["aks_pod_subnet_2"].address_prefixes
                                 ) # ["10.0.128.0/17"]
   destination_address_prefixes  = concat( 
-                                    azurerm_subnet.aks_subnets["aks_node_subnet_1"].address_prefixes,
-                                    azurerm_subnet.aks_subnets["aks_node_subnet_2"].address_prefixes
+                                    var.aks_config.subnets_map["aks_node_subnet_1"].address_prefixes,
+                                    var.aks_config.subnets_map["aks_node_subnet_2"].address_prefixes
                                 ) # ["10.0.120.0/21"]
 }
 # resource "azurerm_network_security_rule" "deny_node_subnet_egress" {

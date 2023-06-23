@@ -1,0 +1,1 @@
+{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"aks_cluster","Source":"./modules/aks_cluster","Dir":"modules/aks_cluster"},{"Key":"aks_subnets","Source":"./modules/subnet","Dir":"modules/subnet"},{"Key":"aks_vnet","Source":"./modules/vnet","Dir":"modules/vnet"},{"Key":"vnet","Source":"./modules/vnet","Dir":"modules/vnet"}]}
