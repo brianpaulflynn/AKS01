@@ -1,5 +1,7 @@
-.terraform.lock.hcl
-.terraform.tfstate.lock.info
-terraform.tfstate
-.terraform/providers/registry.terraform.io/hashicorp/azurerm/3.61.0/linux_amd64/terraform-provider-azurerm_v3.61.0_x5
-terraform.tfstate.backup
+terraform/.terraform/providers/registry.terraform.io/hashicorp/azurerm/*
+terraform/.terraform/providers/registry.terraform.io/hashicorp/azurerm/3.61.0/linux_amd64/terraform-provider-azurerm_v3.61.0_x5
+terraform/.terraform.lock.hcl
+terraform/.terraform.tfstate.lock.info
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/.terraform/modules/modules.json
