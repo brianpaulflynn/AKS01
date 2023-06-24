@@ -97,5 +97,19 @@ variable "aks_config" {
         actions                 = ["Microsoft.Network/networkinterfaces/*"]
       },
     }
+    # node_pool_map = {
+    #   node_pool_1 = {
+    #     name                  = "pool1"
+    #     Environment           = "Pool1Tag"
+    #     min_count             = 1
+    #     max_count             = 3
+    #     },
+    #   node_pool_2 = {
+    #     name                  = "pool2"
+    #     Environment           = "Pool2Tag"
+    #     min_count             = 1
+    #     max_count             = 3
+    #     }
+    # }
   }
 }
