@@ -16,13 +16,13 @@ module "aks_node_pool_1" {
   pod_subnet_id         = module.aks_subnets.subnet_ids["aks_pod_subnet_1"]
   max_pods              = 32  # CONSIDER: make this not exposed. Make it determined by network math. 2^(node_mask/pod_mask)
   os_disk_size_gb       = 30
+  zones                 = [1, 2, 3]
   enable_auto_scaling   = true
   name                  = "pool1"
   vm_size               = "Standard_B2s"
-  zones                 = [1, 2, 3]
+  Environment           = "Pool1Tag"
   min_count             = 1
   max_count             = 3
-  Environment           = "Pool1Tag"
 }
 module "aks_node_pool_2" {
   source                = "../modules/aks_node_pool"
@@ -31,11 +31,11 @@ module "aks_node_pool_2" {
   pod_subnet_id         = module.aks_subnets.subnet_ids["aks_pod_subnet_2"]
   max_pods              = 32  # CONSIDER: make this not exposed. Make it determined by network math. 2^(node_mask/pod_mask)
   os_disk_size_gb       = 30
+  zones                 = [1, 2, 3]
   enable_auto_scaling   = true
   name                  = "pool2"
   vm_size               = "Standard_B2s"
-  zones                 = [1, 2, 3]
+  Environment           = "Pool2Tag"
   min_count             = 1
   max_count             = 3
-  Environment           = "Pool2Tag"
 }
