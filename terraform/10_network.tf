@@ -36,28 +36,28 @@ module "aks_nsg" {
 #   subnet_id                 = module.aks_subnets.subnet_ids[each.key]
 #   network_security_group_id = module.aks_nsg.network_security_group_id
 # }
-module "subnets_nsg_association" {
+module "subnets_nsg_association_default_node_pool" {
   source                    = "../modules/nsga"
   for_each                  = node_pool_map["aks_default_node_pool"].node_address_prefixes
   subnets_map               = node_pool_map["aks_default_node_pool"].node_address_prefixes
   subnet_id                 = module.aks_subnets.subnet_ids[each.key]
   network_security_group_id = module.aks_nsg.network_security_group_id
 }
-module "subnets_nsg_association" {
+module "subnets_nsg_association_default_pod_pool" {
   source                    = "../modules/nsga"
   for_each                  = node_pool_map["aks_default_node_pool"].pod_address_prefixes
   subnets_map               = node_pool_map["aks_default_node_pool"].pod_address_prefixes
   subnet_id                 = module.aks_subnets.subnet_ids[each.key]
   network_security_group_id = module.aks_nsg.network_security_group_id
 }
-module "subnets_nsg_association" {
+module "subnets_nsg_association_node_pools" {
   source                    = "../modules/nsga"
   for_each                  = node_pool_map["aks_user_node_pool_*"].node_address_prefixes     # <=== PSEUDO CODE!!!!
   subnets_map               = node_pool_map["aks_user_node_pool_*"].node_address_prefixes     # <=== PSEUDO CODE!!!!
   subnet_id                 = module.aks_subnets.subnet_ids[each.key]
   network_security_group_id = module.aks_nsg.network_security_group_id
 }
-module "subnets_nsg_association" {
+module "subnets_nsg_association_pod_pools" {
   source                    = "../modules/nsga"
   for_each                  = node_pool_map["aks_user_node_pool_*"].pod_address_prefixes     # <=== PSEUDO CODE!!!!
   subnets_map               = node_pool_map["aks_user_node_pool_*"].pod_address_prefixes     # <=== PSEUDO CODE!!!!
