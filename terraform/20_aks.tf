@@ -9,7 +9,7 @@ module "aks_cluster" {
 }
 # Define AKS Pools
 # Suggestion: Define Availability Sets for node_pools to improve resiliency.
-module "node_pool_1" {
+module "aks_node_pool_1" {
   source                = "../modules/aks_node_pool"
   kubernetes_cluster_id = module.aks_cluster.aks_cluster_id
   vnet_subnet_id        = module.aks_subnets.subnet_ids["aks_node_subnet_1"]
@@ -24,7 +24,7 @@ module "node_pool_1" {
   max_pods              = 32
   Environment           = "Pool1Tag"
 }
-module "node_pool_2" {
+module "aks_node_pool_2" {
   source                = "../modules/aks_node_pool"
   kubernetes_cluster_id = module.aks_cluster.aks_cluster_id
   vnet_subnet_id        = module.aks_subnets.subnet_ids["aks_node_subnet_2"]
