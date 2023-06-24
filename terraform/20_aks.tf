@@ -1,8 +1,8 @@
 # Define AKS Cluster
 module "aks_cluster" {
   source                         = "../modules/aks_cluster"
-  aks_config                     = var.aks_config
   AD_GROUP_ID                    = var.AD_GROUP_ID # TF Env Var
+  aks_config                     = var.aks_config
   aks_managed_identity_ids       = [module.aks_cluster_identity.identity_id]
   aks_log_analytics_workspace_id = module.aks_log_analytics.log_analytics_workspace_id
   subnet_ids                     = module.aks_subnets.subnet_ids

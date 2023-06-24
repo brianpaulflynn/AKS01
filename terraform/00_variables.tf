@@ -63,8 +63,8 @@ variable "aks_config" {
       },
       aks_firewall_subnet = {
         address_prefixes        = ["10.0.0.0/24"]
-        service_delegation_name = "Microsoft.ContainerService/managedClusters"
-        actions                 = ["Microsoft.Network/networkinterfaces/*"]
+        service_delegation_name = "Microsoft.ContainerService/managedClusters"  # This could move out of the config, I think?
+        actions                 = ["Microsoft.Network/networkinterfaces/*"]     # This could move out of the config, I think?
       },
       aks_backend_service_subnet = {
         address_prefixes        = ["10.0.2.0/24"]
@@ -99,16 +99,16 @@ variable "aks_config" {
     }
     # node_pool_map = {
     #   node_pool_1 = {
-    #     name                  = "pool1"
-    #     Environment           = "Pool1Tag"
-    #     min_count             = 1
-    #     max_count             = 3
+    #     name        = "pool1"
+    #     Environment = "Pool1Tag"
+    #     min_count   = 1
+    #     max_count   = 3
     #     },
     #   node_pool_2 = {
-    #     name                  = "pool2"
-    #     Environment           = "Pool2Tag"
-    #     min_count             = 1
-    #     max_count             = 3
+    #     name        = "pool2"
+    #     Environment = "Pool2Tag"
+    #     min_count   = 1
+    #     max_count   = 3
     #     }
     # }
   }

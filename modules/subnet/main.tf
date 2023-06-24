@@ -9,8 +9,8 @@ resource "azurerm_subnet" "aks_subnets" {
     content {
       name      = "${var.aks_config.subnets_map[each.key].service_delegation_name}-delegation"
       service_delegation {
-        name    = var.aks_config.subnets_map[each.key].service_delegation_name
-        actions = var.aks_config.subnets_map[each.key].actions
+        name    = var.aks_config.subnets_map[each.key].service_delegation_name  # = "Microsoft.ContainerService/managedClusters"
+        actions = var.aks_config.subnets_map[each.key].actions                  # = ["Microsoft.Network/networkinterfaces/*"]
       }
     }
   }
