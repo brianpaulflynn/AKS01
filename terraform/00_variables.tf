@@ -91,7 +91,7 @@ variable "aks_config" {
     }
     subnets_map = {                                                             # This could move out of the config.
       aks_default_node_pool = {
-        address_prefixes        = ["10.0.1.0/24"]                               # after this is freed up.
+        address_prefixes        = ["10.0.1.0/24"]                               # after subnets_map[x].address_prefixes is freed up.
         service_delegation_name = null                                          # But rem to define default node pool separately!
         actions                 = null                                          # it doesn't need the same service delegation.
       },                                                                        # Now, instead of subnets_map, we need
