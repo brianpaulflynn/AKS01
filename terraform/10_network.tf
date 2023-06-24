@@ -66,13 +66,7 @@ module "subnets_nsg_association" {
 }
 ################################################################
 ################################################################
-module "subnets_nsg_association" {
-  source                    = "../modules/nsga"
-  for_each                  = var.aks_config.subnets_map
-  subnets_map               = var.aks_config.subnets_map
-  subnet_id                 = module.aks_subnets.subnet_ids[each.key]
-  network_security_group_id = module.aks_nsg.network_security_group_id
-}
+
 # Define NSG rules
 module "allow_pod_subnet_outbound" {
   source                      = "../modules/nsr"
