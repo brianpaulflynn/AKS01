@@ -63,8 +63,8 @@ variable "aks_config" {
       },
       aks_firewall_subnet = {
         address_prefixes        = ["10.0.0.0/24"]
-        service_delegation_name = "Microsoft.ContainerService/managedClusters"  # This could move out of the config, I think?
-        actions                 = ["Microsoft.Network/networkinterfaces/*"]     # This could move out of the config, I think?
+        service_delegation_name = "Microsoft.ContainerService/managedClusters"  # This could move out of the config.
+        actions                 = ["Microsoft.Network/networkinterfaces/*"]     # This could move out of the config.
       },
       aks_backend_service_subnet = {
         address_prefixes        = ["10.0.2.0/24"]
