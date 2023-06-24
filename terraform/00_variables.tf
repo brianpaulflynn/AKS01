@@ -30,6 +30,14 @@ variable "aks_config" {
       }
       )
     )
+    node_pool_map = map(object({
+      node_address_prefixes = list(string)
+      pod_address_prefixes  = list(string)
+      name                  = string
+      Environment           = string
+      min_count             = string
+      max_count             = string
+    }))
     }
   )
   default = {
@@ -97,19 +105,23 @@ variable "aks_config" {
         actions                 = ["Microsoft.Network/networkinterfaces/*"]
       },
     }
-    # node_pool_map = {
-    #   node_pool_1 = {
-    #     name        = "pool1"
-    #     Environment = "Pool1Tag"
-    #     min_count   = 1
-    #     max_count   = 3
-    #     },
-    #   node_pool_2 = {
-    #     name        = "pool2"
-    #     Environment = "Pool2Tag"
-    #     min_count   = 1
-    #     max_count   = 3
-    #     }
-    # }
+    node_pool_map = {
+      node_pool_1 = {
+        node_address_prefixes = ["10.0.124.0/27"]
+        pod_address_prefixes  = ["10.0.132.0/22"]
+        name                  = "pool1"
+        Environment           = "Pool1Tag"
+        min_count             = 1
+        max_count             = 3
+        },
+      node_pool_2 = {
+        node_address_prefixes = ["10.0.124.32/27"]
+        pod_address_prefixes  = ["10.0.136.0/22"]
+        name                  = "pool2"
+        Environment           = "Pool2Tag"
+        min_count             = 1
+        max_count             = 3
+        }
+    }
   }
 }
