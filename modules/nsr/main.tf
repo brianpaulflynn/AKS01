@@ -9,8 +9,8 @@ resource "azurerm_network_security_rule" "this" {
   source_port_range             = var.source_port_range 
   destination_port_range        = var.destination_port_range 
   source_address_prefixes       = concat( 
-                                    var.aks_config.subnets_map["aks_pod_subnet_1"].address_prefixes,
-                                    var.aks_config.subnets_map["aks_pod_subnet_2"].address_prefixes
+                                    var.aks_config.node_pool_map.node_address_prefixes["aks_pod_subnet_1"].address_prefixes,
+                                    var.aks_config.node_pool_map.node_address_prefixes["aks_pod_subnet_2"].address_prefixes
                                 ) 
   destination_address_prefixes  = var.destination_address_prefixes
 }

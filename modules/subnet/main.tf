@@ -5,12 +5,12 @@ resource "azurerm_subnet" "aks_subnets" {
   name                  = each.key
   address_prefixes      = each.value.address_prefixes
   dynamic "delegation" { # Grant cluster access to manage subnets
-    for_each = var.aks_config.subnets_map[each.key].service_delegation_name != null ? [var.aks_config.subnets_map[each.key].service_delegation_name] : []
+    for_each = var.aks_config.node_pool_map.node_address_prefixes[each.key].service_delegation_name != null ? [var.aks_config.subnets_map[each.key].service_delegation_name] : []
     content {
-      name      = "${var.aks_config.subnets_map[each.key].service_delegation_name}-delegation"
+      name      = "${var.aks_config.node_pool_map.node_address_prefixes[each.key].service_delegation_name}-delegation"
       service_delegation {
-        name    = "Microsoft.ContainerService/managedClusters" # var.aks_config.subnets_map[each.key].service_delegation_name  # = 
-        actions = ["Microsoft.Network/networkinterfaces/*"] # var.aks_config.subnets_map[each.key].actions                  # = 
+        name    = "Microsoft.ContainerService/managedClusters" # var.aks_config.node_pool_map.node_address_prefixes[each.key].service_delegation_name  # = 
+        actions = ["Microsoft.Network/networkinterfaces/*"] # var.aks_config.node_pool_map.node_address_prefixes[each.key].actions                  # = 
       }
     }
   }
