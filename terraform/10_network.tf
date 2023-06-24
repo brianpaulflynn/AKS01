@@ -22,9 +22,9 @@ module "aks_nsg" {
 
 # Need to expand every: or_each = var.aks_config.subnets_map 
 # for:
-# - node_pool_map["aks_default_node_pool"]node_address_prefixes
-# - node_pool_map["aks_default_node_pool"]"pod_address_prefixes
-# - node_pool_map["aks_user_node_pool_*"]node_address_prefixes
+# - node_pool_map["aks_default_node_pool"].node_address_prefixes
+# - node_pool_map["aks_default_node_pool"].pod_address_prefixes
+# - node_pool_map["aks_user_node_pool_*"].node_address_prefixes
 # - node_pool_map["aks_user_node_pool_*"]"pod_address_prefixes
 
 module "subnets_nsg_association" {
