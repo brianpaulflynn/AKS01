@@ -20,13 +20,52 @@ module "aks_nsg" {
 }
 
 
+################################################################
+# Framed Change In Progress.... INCOMPLETE!!!
+################################################################
 # Need to expand every: or_each = var.aks_config.subnets_map 
 # for:
 # - node_pool_map["aks_default_node_pool"].node_address_prefixes
 # - node_pool_map["aks_default_node_pool"].pod_address_prefixes
 # - node_pool_map["aks_user_node_pool_*"].node_address_prefixes
-# - node_pool_map["aks_user_node_pool_*"]"pod_address_prefixes
-
+# - node_pool_map["aks_user_node_pool_*"].pod_address_prefixes
+# module "subnets_nsg_association" {
+#   source                    = "../modules/nsga"
+#   for_each                  = var.aks_config.subnets_map
+#   subnets_map               = var.aks_config.subnets_map
+#   subnet_id                 = module.aks_subnets.subnet_ids[each.key]
+#   network_security_group_id = module.aks_nsg.network_security_group_id
+# }
+module "subnets_nsg_association" {
+  source                    = "../modules/nsga"
+  for_each                  = node_pool_map["aks_default_node_pool"].node_address_prefixes
+  subnets_map               = node_pool_map["aks_default_node_pool"].node_address_prefixes
+  subnet_id                 = module.aks_subnets.subnet_ids[each.key]
+  network_security_group_id = module.aks_nsg.network_security_group_id
+}
+module "subnets_nsg_association" {
+  source                    = "../modules/nsga"
+  for_each                  = node_pool_map["aks_default_node_pool"].pod_address_prefixes
+  subnets_map               = node_pool_map["aks_default_node_pool"].pod_address_prefixes
+  subnet_id                 = module.aks_subnets.subnet_ids[each.key]
+  network_security_group_id = module.aks_nsg.network_security_group_id
+}
+module "subnets_nsg_association" {
+  source                    = "../modules/nsga"
+  for_each                  = node_pool_map["aks_user_node_pool_*"].node_address_prefixes
+  subnets_map               = node_pool_map["aks_user_node_pool_*"].node_address_prefixes
+  subnet_id                 = module.aks_subnets.subnet_ids[each.key]
+  network_security_group_id = module.aks_nsg.network_security_group_id
+}
+module "subnets_nsg_association" {
+  source                    = "../modules/nsga"
+  for_each                  = node_pool_map["aks_user_node_pool_*"].pod_address_prefixes
+  subnets_map               = node_pool_map["aks_user_node_pool_*"].pod_address_prefixes
+  subnet_id                 = module.aks_subnets.subnet_ids[each.key]
+  network_security_group_id = module.aks_nsg.network_security_group_id
+}
+################################################################
+################################################################
 module "subnets_nsg_association" {
   source                    = "../modules/nsga"
   for_each                  = var.aks_config.subnets_map
