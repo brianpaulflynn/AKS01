@@ -22,14 +22,6 @@ variable "aks_config" {
     run_command_enabled               = string
     public_network_access_enabled     = string
     private_cluster_enabled           = string
-    #aks_log_analytics_workspace_id    = string
-    subnets_map = map(object({
-      address_prefixes        = list(string)
-      service_delegation_name = optional(string)
-      actions                 = optional(list(string))
-      }
-      )
-    )
     node_pool_map = map(object({
       node_address_prefixes = list(string)
       pod_address_prefixes  = list(string)
@@ -38,6 +30,14 @@ variable "aks_config" {
       min_count             = string
       max_count             = string
     }))
+    #aks_log_analytics_workspace_id    = string
+    subnets_map = map(object({
+      address_prefixes        = list(string)
+      service_delegation_name = optional(string)
+      actions                 = optional(list(string))
+      }
+      )
+    )
     }
   )
   default = {
@@ -63,16 +63,34 @@ variable "aks_config" {
     public_network_access_enabled     = false # Best Practice Default
     private_cluster_enabled           = true  # Best Practice Default
     #aks_log_analytics_workspace_id    = null
-    subnets_map = {
+    node_pool_map = {
+      node_pool_1 = {
+        node_address_prefixes = ["10.0.124.0/27"]
+        pod_address_prefixes  = ["10.0.132.0/22"]
+        name                  = "pool1"
+        Environment           = "Pool1Tag"
+        min_count             = 1
+        max_count             = 3
+        },
+      node_pool_2 = {
+        node_address_prefixes = ["10.0.124.32/27"]
+        pod_address_prefixes  = ["10.0.136.0/22"]
+        name                  = "pool2"
+        Environment           = "Pool2Tag"
+        min_count             = 1
+        max_count             = 3
+        }
+    }
+    subnets_map = {                                                             # This could move out of the config.
       aks_default_node_pool = {
-        address_prefixes        = ["10.0.1.0/24"]
+        address_prefixes        = ["10.0.1.0/24"]                               # after this is freed up.
         service_delegation_name = null
         actions                 = null
       },
       aks_firewall_subnet = {
         address_prefixes        = ["10.0.0.0/24"]
-        service_delegation_name = "Microsoft.ContainerService/managedClusters"  # This could move out of the config.
-        actions                 = ["Microsoft.Network/networkinterfaces/*"]     # This could move out of the config.
+        service_delegation_name = "Microsoft.ContainerService/managedClusters"  # now set in module.
+        actions                 = ["Microsoft.Network/networkinterfaces/*"]     # now set in module
       },
       aks_backend_service_subnet = {
         address_prefixes        = ["10.0.2.0/24"]
@@ -104,24 +122,6 @@ variable "aks_config" {
         service_delegation_name = "Microsoft.ContainerService/managedClusters"
         actions                 = ["Microsoft.Network/networkinterfaces/*"]
       },
-    }
-    node_pool_map = {
-      node_pool_1 = {
-        node_address_prefixes = ["10.0.124.0/27"]
-        pod_address_prefixes  = ["10.0.132.0/22"]
-        name                  = "pool1"
-        Environment           = "Pool1Tag"
-        min_count             = 1
-        max_count             = 3
-        },
-      node_pool_2 = {
-        node_address_prefixes = ["10.0.124.32/27"]
-        pod_address_prefixes  = ["10.0.136.0/22"]
-        name                  = "pool2"
-        Environment           = "Pool2Tag"
-        min_count             = 1
-        max_count             = 3
-        }
     }
   }
 }
