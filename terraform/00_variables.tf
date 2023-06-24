@@ -64,6 +64,14 @@ variable "aks_config" {
     private_cluster_enabled           = true  # Best Practice Default
     #aks_log_analytics_workspace_id    = null
     node_pool_map = {
+      aks_default_node_pool = {
+        node_address_prefixes = ["10.0.124.0/27"]
+        pod_address_prefixes  = ["10.0.132.0/22"]
+        name                  = "pool1"
+        Environment           = "Pool1Tag"
+        min_count             = 1
+        max_count             = 3
+      }
       node_pool_1 = {
         node_address_prefixes = ["10.0.124.0/27"]
         pod_address_prefixes  = ["10.0.132.0/22"]
@@ -84,8 +92,8 @@ variable "aks_config" {
     subnets_map = {                                                             # This could move out of the config.
       aks_default_node_pool = {
         address_prefixes        = ["10.0.1.0/24"]                               # after this is freed up.
-        service_delegation_name = null
-        actions                 = null
+        service_delegation_name = null                                          # But rem to define default node pool separately!
+        actions                 = null                                          # it doesn't need the same service delegation.
       },
       aks_firewall_subnet = {
         address_prefixes        = ["10.0.0.0/24"]
