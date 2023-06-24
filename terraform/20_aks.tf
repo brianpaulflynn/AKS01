@@ -1,15 +1,16 @@
 # Define AKS Cluster
 module "aks_cluster" {
-  source                         = "../modules/aks_cluster"
-  AD_GROUP_ID                    = var.AD_GROUP_ID # TF Env Var
-  aks_config                     = var.aks_config
-  aks_managed_identity_ids       = [module.aks_cluster_identity.identity_id]
-  aks_log_analytics_workspace_id = module.aks_log_analytics.log_analytics_workspace_id
-  subnet_ids                     = module.aks_subnets.subnet_ids
+  source                          = "../modules/aks_cluster"
+  AD_GROUP_ID                     = var.AD_GROUP_ID # TF Env Var
+  aks_config                      = var.aks_config
+  aks_managed_identity_ids        = [module.aks_cluster_identity.identity_id]
+  aks_log_analytics_workspace_id  = module.aks_log_analytics.log_analytics_workspace_id
+  vnet_subnet_ids                 = module.aks_subnets.aks_node_subnet_ids
+  pod_subnet_ids                  = module.aks_subnets.aks_pod_subnet_ids
 }
 # Define AKS Pools
 # Suggestion: Define Availability Sets for node_pools to improve resiliency.
-module "aks_node_pool_1" {
+module "aks_node_pools" {
   # ADD FOR EACH HERE THAT USES A MAP IN THE aks_config VARIABLE
   source                = "../modules/aks_node_pool" # we may want many different node pools defined in modules that all inherit this.
   kubernetes_cluster_id = module.aks_cluster.aks_cluster_id
@@ -19,8 +20,8 @@ module "aks_node_pool_1" {
   zones                 = [1, 2, 3]       # CONSIDER: holding back in modules defined to expose configured skus to developers.
   enable_auto_scaling   = true            # CONSIDER: holding back in modules defined to expose configured skus to developers.
 
-  vnet_subnet_id        = module.aks_subnets.subnet_ids["aks_node_subnet_1"]    # var.aks_config.node_pool_map.node_pool_name ???
-  pod_subnet_id         = module.aks_subnets.subnet_ids["aks_pod_subnet_1"]     # var.aks_config.node_pool_map.node_pool_name ???
+  vnet_subnet_id        = module.aks_subnets.aks_node_subnet_ids["aks_user_node_pool_1"]    # var.aks_config.node_pool_map.node_pool_name ???
+  pod_subnet_id         = module.aks_subnets.aks_pod_subnet_ids["aks_user_node_pool_2"]     # var.aks_config.node_pool_map.node_pool_name ???
   name                  = "pool1"         # CONSIDER: making available to developers via var.aks_config.
   Environment           = "Pool1Tag"      # CONSIDER: making available to developers via var.aks_config.
   min_count             = 1               # CONSIDER: making available to developers via var.aks_config.

@@ -7,9 +7,10 @@ module "aks_vnet" {
   address_space       = [var.aks_config.vnet_cidr]
 }
 module "aks_subnets" {
-  source               = "../modules/subnet"
-  resource_group_name  = module.aks_cluster_rg.rg_name
-  virtual_network_name = module.aks_vnet.vnet_name
+  source                = "../modules/subnet"
+  resource_group_name   = module.aks_cluster_rg.rg_name
+  virtual_network_name  = module.aks_vnet.vnet_name
+  node_pool_map         = var.aks_config.node_pool_map
 }
 # Define the AKS network security group (NSG)
 module "aks_nsg" {
@@ -29,6 +30,26 @@ module "aks_nsg" {
 # - node_pool_map["aks_default_node_pool"].pod_address_prefixes
 # - node_pool_map["aks_user_node_pool_*"].node_address_prefixes
 # - node_pool_map["aks_user_node_pool_*"].pod_address_prefixes
+
+module "subnets_nsg_association_nodes" {
+  source                    = "../modules/nsga"
+  for_each                  = var.aks_config.node_pool_map
+  #node_pool_map             = var.aks_config.node_pool_map
+  #NODES SUBNET IDS!
+  subnet_id                 = module.aks_subnets.aks_node_subnet_ids[each.key]
+  network_security_group_id = module.aks_nsg.network_security_group_id
+}
+module "subnets_nsg_association_pods" {
+  source                    = "../modules/nsga"
+  for_each                  = var.aks_config.node_pool_map
+  #node_pool_map             = var.aks_config.node_pool_map
+  #PODS SUBNET IDS!
+  subnet_id                 = module.aks_subnets.aks_pod_subnet_ids[each.key]
+  network_security_group_id = module.aks_nsg.network_security_group_id
+}
+# output "aks_node_subnet_ids" {
+# output "aks_pod_subnet_ids" {
+
 # module "subnets_nsg_association" {
 #   source                    = "../modules/nsga"
 #   for_each                  = var.aks_config.subnets_map
@@ -36,41 +57,55 @@ module "aks_nsg" {
 #   subnet_id                 = module.aks_subnets.subnet_ids[each.key]
 #   network_security_group_id = module.aks_nsg.network_security_group_id
 # }
-module "subnets_nsg_association_default_node_pool" {
-  source                    = "../modules/nsga"
-  for_each                  = node_pool_map["aks_default_node_pool"].node_address_prefixes
-  subnets_map               = node_pool_map["aks_default_node_pool"].node_address_prefixes
-  subnet_id                 = module.aks_subnets.subnet_ids[each.key]
-  network_security_group_id = module.aks_nsg.network_security_group_id
-}
-module "subnets_nsg_association_default_pod_pool" {
-  source                    = "../modules/nsga"
-  for_each                  = node_pool_map["aks_default_node_pool"].pod_address_prefixes
-  subnets_map               = node_pool_map["aks_default_node_pool"].pod_address_prefixes
-  subnet_id                 = module.aks_subnets.subnet_ids[each.key]
-  network_security_group_id = module.aks_nsg.network_security_group_id
-}
-module "subnets_nsg_association_node_pools" {
-  source                    = "../modules/nsga"
-  for_each                  = node_pool_map["aks_user_node_pool_*"].node_address_prefixes     # <=== PSEUDO CODE!!!!
-  subnets_map               = node_pool_map["aks_user_node_pool_*"].node_address_prefixes     # <=== PSEUDO CODE!!!!
-  subnet_id                 = module.aks_subnets.subnet_ids[each.key]
-  network_security_group_id = module.aks_nsg.network_security_group_id
-}
-module "subnets_nsg_association_pod_pools" {
-  source                    = "../modules/nsga"
-  for_each                  = node_pool_map["aks_user_node_pool_*"].pod_address_prefixes     # <=== PSEUDO CODE!!!!
-  subnets_map               = node_pool_map["aks_user_node_pool_*"].pod_address_prefixes     # <=== PSEUDO CODE!!!!
-  subnet_id                 = module.aks_subnets.subnet_ids[each.key]
-  network_security_group_id = module.aks_nsg.network_security_group_id
-}
-################################################################
-################################################################
+# module "subnets_nsg_association_default_node_pool_node_address_prefixes" {
+#   source                    = "../modules/nsga"
+#   for_each                  = var.aks_config.node_pool_map
+#   subnets_map               = var.aks_config.node_pool_map
+#   subnet_id                 = module.aks_subnets.subnet_ids[each.key] #### 
+#   network_security_group_id = module.aks_nsg.network_security_group_id
+# }
+# module "subnets_nsg_association_default_node_pool_pod_address_prefixes" {
+#   source                    = "../modules/nsga"
+#   for_each                  = var.aks_config.node_pool_map
+#   subnets_map               = var.aks_config.node_pool_map
+#   subnet_id                 = module.aks_subnets.subnet_ids[each.key] #### 
+#   network_security_group_id = module.aks_nsg.network_security_group_id
+# }
+# module "subnets_nsg_association_default_node_pool" {
+#   source                    = "../modules/nsga"
+#   for_each                  = var.aks_config.node_pool_map["aks_default_node_pool"].node_address_prefixes
+#   subnets_map               = var.aks_config.node_pool_map["aks_default_node_pool"].node_address_prefixes
+#   subnet_id                 = module.aks_subnets.subnet_ids[each.key] #### 
+#   network_security_group_id = module.aks_nsg.network_security_group_id
+# }
+# module "subnets_nsg_association_default_pod_pool" {
+#   source                    = "../modules/nsga"
+#   for_each                  = var.aks_config.node_pool_map["aks_default_node_pool"].pod_address_prefixes
+#   subnets_map               = var.aks_config.node_pool_map["aks_default_node_pool"].pod_address_prefixes
+#   subnet_id                 = module.aks_subnets.subnet_ids[each.key]
+#   network_security_group_id = module.aks_nsg.network_security_group_id
+# }
+# module "subnets_nsg_association_node_pools" {
+#   source                    = "../modules/nsga"
+#   for_each                  = var.aks_config.node_pool_map["aks_user_node_pool_*"].node_address_prefixes     # <=== PSEUDO CODE!!!!
+#   subnets_map               = var.aks_config.node_pool_map["aks_user_node_pool_*"].node_address_prefixes     # <=== PSEUDO CODE!!!!
+#   subnet_id                 = module.aks_subnets.subnet_ids[each.key]
+#   network_security_group_id = module.aks_nsg.network_security_group_id
+# }
+# module "subnets_nsg_association_pod_pools" {
+#   source                    = "../modules/nsga"
+#   for_each                  = var.aks_config.node_pool_map["aks_user_node_pool_*"].pod_address_prefixes     # <=== PSEUDO CODE!!!!
+#   subnets_map               = var.aks_config.node_pool_map["aks_user_node_pool_*"].pod_address_prefixes     # <=== PSEUDO CODE!!!!
+#   subnet_id                 = module.aks_subnets.subnet_ids[each.key]
+#   network_security_group_id = module.aks_nsg.network_security_group_id
+# }
+# ################################################################
+# ################################################################
 
 # Define NSG rules
 module "allow_pod_subnet_outbound" {
   source                      = "../modules/nsr"
-  subnets_map                 = var.aks_config.subnets_map
+  #node_pool_map               = var.aks_config.node_pool_map
   name                        = "pod-subnet-outbound"
   resource_group_name         = module.aks_cluster_rg.rg_name
   network_security_group_name = module.aks_nsg.network_security_group_name
@@ -81,14 +116,14 @@ module "allow_pod_subnet_outbound" {
   source_port_range           = "*"
   destination_port_range      = "*"
   source_address_prefixes = concat(
-    var.aks_config.node_pool_map.node_address_prefixes["aks_pod_subnet_1"].address_prefixes,
-    var.aks_config.node_pool_map.node_address_prefixes["aks_pod_subnet_2"].address_prefixes
+    var.aks_config.node_pool_map["aks_user_node_pool_1"].pod_address_prefixes,
+    var.aks_config.node_pool_map["aks_user_node_pool_2"].pod_address_prefixes
   )
   destination_address_prefixes = ["0.0.0.0/0"]
 }
 module "allow_pod_to_pod" {
   source                      = "../modules/nsr"
-  subnets_map                 = var.aks_config.subnets_map
+  #node_pool_map               = var.aks_config.node_pool_map
   name                        = "pod-to-pod-inbound"
   resource_group_name         = module.aks_cluster_rg.rg_name
   network_security_group_name = module.aks_nsg.network_security_group_name
@@ -99,17 +134,17 @@ module "allow_pod_to_pod" {
   source_port_range           = "*"
   destination_port_range      = "*"
   source_address_prefixes = concat(
-    var.aks_config.node_pool_map.node_address_prefixes["aks_pod_subnet_1"].address_prefixes,
-    var.aks_config.node_pool_map.node_address_prefixes["aks_pod_subnet_2"].address_prefixes
+    var.aks_config.node_pool_map["aks_user_node_pool_1"].pod_address_prefixes,
+    var.aks_config.node_pool_map["aks_user_node_pool_2"].pod_address_prefixes
   )
   destination_address_prefixes = concat(
-    var.aks_config.node_pool_map.node_address_prefixes["aks_pod_subnet_1"].address_prefixes,
-    var.aks_config.node_pool_map.node_address_prefixes["aks_pod_subnet_2"].address_prefixes
+    var.aks_config.node_pool_map["aks_user_node_pool_1"].pod_address_prefixes,
+    var.aks_config.node_pool_map["aks_user_node_pool_2"].pod_address_prefixes
   ) 
 }
 module "deny_node_to_pod_subnet" {
   source                      = "../modules/nsr"
-  subnets_map                 = var.aks_config.subnets_map
+  #node_pool_map               = var.aks_config.node_pool_map
   name                        = "deny-node-to-pod-subnet"
   resource_group_name         = module.aks_cluster_rg.rg_name
   network_security_group_name = module.aks_nsg.network_security_group_name
@@ -120,17 +155,18 @@ module "deny_node_to_pod_subnet" {
   source_port_range           = "*"
   destination_port_range      = "*"
   source_address_prefixes = concat(
-    var.aks_config.node_pool_map.node_address_prefixes["aks_node_subnet_1"].address_prefixes,
-    var.aks_config.node_pool_map.node_address_prefixes["aks_node_subnet_2"].address_prefixes
+    var.aks_config.node_pool_map["aks_user_node_pool_1"].node_address_prefixes,
+    var.aks_config.node_pool_map["aks_user_node_pool_2"].node_address_prefixes
+
   )
   destination_address_prefixes = concat(
-    var.aks_config.node_pool_map.node_address_prefixes["aks_pod_subnet_1"].address_prefixes,
-    var.aks_config.node_pool_map.node_address_prefixes["aks_pod_subnet_2"].address_prefixes
+    var.aks_config.node_pool_map["aks_user_node_pool_1"].pod_address_prefixes,
+    var.aks_config.node_pool_map["aks_user_node_pool_2"].pod_address_prefixes
   )
 }
 module "deny_pod_to_node_subnet" {
   source                      = "../modules/nsr"
-  subnets_map                 = var.aks_config.subnets_map
+  #node_pool_map               = var.aks_config.node_pool_map
   name                        = "deny-pod-to-node-subnet"
   resource_group_name         = module.aks_cluster_rg.rg_name
   network_security_group_name = module.aks_nsg.network_security_group_name
@@ -141,11 +177,11 @@ module "deny_pod_to_node_subnet" {
   source_port_range           = "*"
   destination_port_range      = "*"
   source_address_prefixes = concat(
-    var.aks_config.node_pool_map.node_address_prefixes["aks_pod_subnet_1"].address_prefixes,
-    var.aks_config.node_pool_map.node_address_prefixes["aks_pod_subnet_2"].address_prefixes
+    var.aks_config.node_pool_map["aks_user_node_pool_1"].node_address_prefixes,
+    var.aks_config.node_pool_map["aks_user_node_pool_2"].node_address_prefixes
   )
   destination_address_prefixes = concat(
-    var.aks_config.node_pool_map.node_address_prefixes["aks_node_subnet_1"].address_prefixes,
-    var.aks_config.node_pool_map.node_address_prefixes["aks_node_subnet_2"].address_prefixes
+    var.aks_config.node_pool_map["aks_user_node_pool_1"].pod_address_prefixes,
+    var.aks_config.node_pool_map["aks_user_node_pool_2"].pod_address_prefixes
   )
 }

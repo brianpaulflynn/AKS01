@@ -44,8 +44,8 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   # }
   default_node_pool {
     # Locked In / Non-Configurable
-    vnet_subnet_id                  = var.subnet_ids["aks_default_node_pool"]       # <=== !!! Need to fix for new subnet change
-    pod_subnet_id                   = var.subnet_ids["aks_default_pod_pool"]        # <=== !!! Need to fix for new subnet change
+    vnet_subnet_id                  = var.vnet_subnet_ids["aks_default_node_pool"] #subnet_ids["aks_default_node_pool"]       # <=== !!! Need to fix for new subnet change
+    pod_subnet_id                   = var.pod_subnet_ids["aks_default_node_pool"] #subnet_ids["aks_default_pod_pool"]        # <=== !!! Need to fix for new subnet change
     only_critical_addons_enabled    = true  # Best Practice
     enable_auto_scaling             = true  # Scale for cost savings
     # # Configurable by module

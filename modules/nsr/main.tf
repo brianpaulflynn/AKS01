@@ -15,9 +15,6 @@ resource "azurerm_network_security_rule" "this" {
   protocol                      = var.protocol
   source_port_range             = var.source_port_range 
   destination_port_range        = var.destination_port_range 
-  source_address_prefixes       = concat( 
-                                    var.source_address_prefixes["aks_pod_subnet_1"].address_prefixes,
-                                    var.source_address_prefixes["aks_pod_subnet_2"].address_prefixes
-                                ) 
+  source_address_prefixes       = var.source_address_prefixes
   destination_address_prefixes  = var.destination_address_prefixes
 }
