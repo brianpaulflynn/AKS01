@@ -65,8 +65,8 @@ variable "aks_config" {
     #aks_log_analytics_workspace_id    = null
     node_pool_map = {
       aks_default_node_pool = {
-        node_address_prefixes = ["10.0.124.0/27"] # node_pool_map["aks_default_node_pool"]node_address_prefixes
-        pod_address_prefixes  = ["10.0.132.0/22"] # node_pool_map["aks_default_node_pool"]"pod_address_prefixes
+        node_address_prefixes = ["10.0.124.0/27"] # node_pool_map["aks_default_node_pool"].node_address_prefixes
+        pod_address_prefixes  = ["10.0.132.0/22"] # node_pool_map["aks_default_node_pool"]".pod_address_prefixes
         name                  = "pool1"
         Environment           = "Pool1Tag"
         min_count             = 1
