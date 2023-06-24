@@ -14,6 +14,7 @@ module "aks_node_pool_1" {
   kubernetes_cluster_id = module.aks_cluster.aks_cluster_id
   vnet_subnet_id        = module.aks_subnets.subnet_ids["aks_node_subnet_1"]
   pod_subnet_id         = module.aks_subnets.subnet_ids["aks_pod_subnet_1"]
+  max_pods              = 32  # CONSIDER: make this not exposed. Make it determined by network math.
   enable_auto_scaling   = true
   name                  = "pool1"
   vm_size               = "Standard_B2s"
@@ -21,7 +22,6 @@ module "aks_node_pool_1" {
   zones                 = [1, 2, 3]
   min_count             = 1
   max_count             = 3
-  max_pods              = 32
   Environment           = "Pool1Tag"
 }
 module "aks_node_pool_2" {
@@ -29,6 +29,7 @@ module "aks_node_pool_2" {
   kubernetes_cluster_id = module.aks_cluster.aks_cluster_id
   vnet_subnet_id        = module.aks_subnets.subnet_ids["aks_node_subnet_2"]
   pod_subnet_id         = module.aks_subnets.subnet_ids["aks_pod_subnet_2"]
+  max_pods              = 32  # CONSIDER: make this not exposed. Make it determined by network math.
   enable_auto_scaling   = true
   name                  = "pool2"
   vm_size               = "Standard_B2s"
@@ -36,6 +37,5 @@ module "aks_node_pool_2" {
   zones                 = [1, 2, 3]
   min_count             = 1
   max_count             = 3
-  max_pods              = 32
   Environment           = "Pool2Tag"
 }
