@@ -94,13 +94,13 @@ variable "aks_config" {
         address_prefixes        = ["10.0.1.0/24"]                               # after this is freed up.
         service_delegation_name = null                                          # But rem to define default node pool separately!
         actions                 = null                                          # it doesn't need the same service delegation.
-      },
-      aks_firewall_subnet = {
-        address_prefixes        = ["10.0.0.0/24"]
-        service_delegation_name = "Microsoft.ContainerService/managedClusters"  # now set in module.
-        actions                 = ["Microsoft.Network/networkinterfaces/*"]     # now set in module
-      },
-      aks_backend_service_subnet = {
+      },                                                                        # Now, instead of subnets_map, we need
+      aks_firewall_subnet = {                                                   # node_pool_map.node_address_prefixes
+        address_prefixes        = ["10.0.0.0/24"]                               # and node_pool_map.pod_address_prefixes.
+        service_delegation_name = "Microsoft.ContainerService/managedClusters"  # Therefore, we need a single subnet definition for
+        actions                 = ["Microsoft.Network/networkinterfaces/*"]     # the default_node_pool, and another for it's pod pool.
+      },                                                                        # And then we'll need a for-each to go over
+      aks_backend_service_subnet = {                                            # the nodes. And another for each of the node's pods.
         address_prefixes        = ["10.0.2.0/24"]
         service_delegation_name = "Microsoft.ContainerService/managedClusters"
         actions                 = ["Microsoft.Network/networkinterfaces/*"]
