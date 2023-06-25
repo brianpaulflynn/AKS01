@@ -1,11 +1,11 @@
 variable "name" {
-    type    = string
+  type = string
 }
 variable "resource_group_name" {
-    type    = string
+  type = string
 }
 variable "location" {
-    type    = string
+  type = string
 }
 # variable "node_pool_map" {
 #     type    = map(object({

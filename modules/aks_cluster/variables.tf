@@ -1,11 +1,11 @@
 # Env vars
-variable "AD_GROUP_ID" { type  = string }
+variable "AD_GROUP_ID" { type = string }
 # from module declaration
 variable "aks_managed_identity_ids" { type = list(string) }
 variable "aks_log_analytics_workspace_id" { type = string }
 #variable "subnet_ids" { type = map(string)}
-variable "vnet_subnet_ids" { type = map(string)}
-variable "pod_subnet_ids" { type = map(string)}
+variable "vnet_subnet_ids" { type = map(string) }
+variable "pod_subnet_ids" { type = map(string) }
 variable "aks_config" {
   type = object({
     default_node_pool_sku             = string
@@ -86,7 +86,7 @@ variable "aks_config" {
         Environment           = "Pool1Tag"
         min_count             = 1
         max_count             = 3
-        },
+      },
       node_pool_2 = {
         node_address_prefixes = ["10.0.124.32/27"]
         pod_address_prefixes  = ["10.0.136.0/22"]
@@ -94,7 +94,7 @@ variable "aks_config" {
         Environment           = "Pool2Tag"
         min_count             = 1
         max_count             = 3
-        }
+      }
     }
     # subnets_map = {                                                             # This could move out of the config.
     #   aks_default_pool = {
