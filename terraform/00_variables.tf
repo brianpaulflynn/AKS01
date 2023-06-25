@@ -44,7 +44,7 @@ variable "aks_config" {
     location                          = "eastus"
     rg                                = "my_aks_rg"
     nodes_rg                          = "my_nodes_rg"
-    name                              = "aks-cluster-name"
+    name                              = "aks-cluster"
     vnet_name                         = "aks-cluster-vnet"
     dns_prefix                        = "aks-cluster-dns"
     default_node_pool_zones           = [1, 2, 3]
