@@ -63,7 +63,7 @@ variable "aks_config" {
       aks_default_pool = {
         node_address_prefixes = ["10.0.123.224/27"]
         pod_address_prefixes  = ["10.0.128.0/22"]
-        max_pods              = 32 # Needs to be determined by network math. 2^(pod_mask-node_mask)
+        max_pods              = 32 # Needs to be determined by network math. 2^(node_mask-pod_mask)
         name                  = "default"
         Environment           = "defaultTag"
         vm_size               = "Standard_B2s"
@@ -76,7 +76,7 @@ variable "aks_config" {
       aks_user_pool_1 = {
         node_address_prefixes = ["10.0.124.0/27"]
         pod_address_prefixes  = ["10.0.132.0/22"]
-        max_pods              = 32 # Needs to be determined by network math. 2^(pod_mask-node_mask)
+        max_pods              = 32 # Needs to be determined by network math. 2^(node_mask-pod_mask)
         # ex: /27 & /22 are /5 apart.  2^(27-22) = 2^5 That makes for 32:1 pods:nodes.
         #     /29 is the smallest Azure subnet. Provides 3 usable IPs.
         name                = "pool1"
