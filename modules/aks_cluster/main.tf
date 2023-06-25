@@ -22,10 +22,10 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   local_account_disabled    = true # Best Practice. And required by AAD integration.
   #role_based_access_control_enabled = true           # does this conflict with azure_rbac_enabled?
   azure_active_directory_role_based_access_control { # AAD interated
-    managed                = true
-    azure_rbac_enabled     = true              # with RBAC permissions granularity
-    admin_group_object_ids = [var.AD_GROUP_ID] # from TF_VARS
-  }                                            # for some AAD group identifier
+    azure_rbac_enabled     = true                    # with RBAC permissions granularity
+    managed                = true                    # managed by AD Group
+    admin_group_object_ids = [var.AD_GROUP_ID]       # from TF_VARS
+  }                                                  # for some AAD group identifier
   default_node_pool {
     # Locked In / Non-Configurable
     vnet_subnet_id               = var.vnet_subnet_ids["aks_default_pool"] #subnet_ids["aks_default_pool"]       # <=== !!! Need to fix for new subnet change
