@@ -27,21 +27,6 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     azure_rbac_enabled     = true # with RBAC permissions granularity
     admin_group_object_ids = [var.AD_GROUP_ID]
   } # for some AAD group identifier
-  # ingress_application_gateway{
-  #   gateway_id    - (Optional) The ID of the Application Gateway to integrate with the ingress controller of this Kubernetes Cluster. See this page for further details.
-  #   subnet_id     - (Optional) The ID of the subnet on which to create an Application Gateway, which in turn will be integrated with the ingress controller of this Kubernetes Cluster. See this page for further details.
-  #   #gateway_name - (Optional) The name of the Application Gateway to be used or created in the Nodepool Resource Group, which in turn will be integrated with the ingress controller of this Kubernetes Cluster. See this page for further details.
-  #   #subnet_cidr  - (Optional) The subnet CIDR to be used to create an Application Gateway, which in turn will be integrated with the ingress controller of this Kubernetes Cluster. See this page for further details.
-  # }
-  # api_server_access_profile {
-  #   vnet_integration_enabled  = true # - (Optional) Should API Server VNet Integration be enabled? For more details please visit Use API Server VNet Integration.
-  #   subnet_id                 = azurerm_subnet.backend_service_subnet.id #(Optional) The ID of the Subnet where the API server endpoint is delegated to.
-  #   #authorized_ip_ranges - (Optional) Set of authorized IP ranges to allow access to API server, e.g. ["198.51.100.0/24"].
-  # }
-  #   workload_autoscaler_profile {                       # Keda autoscaler
-  #   keda_enabled                    = true
-  #   vertical_pod_autoscaler_enabled = true
-  # }
   default_node_pool {
     # Locked In / Non-Configurable
     vnet_subnet_id               = var.vnet_subnet_ids["aks_default_pool"] #subnet_ids["aks_default_pool"]       # <=== !!! Need to fix for new subnet change
@@ -66,6 +51,21 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   run_command_enabled           = var.aks_config.run_command_enabled           # false # Best Practice for Prodcution Servers
   public_network_access_enabled = var.aks_config.public_network_access_enabled # false # Best Practice Default
   private_cluster_enabled       = var.aks_config.private_cluster_enabled       # true  # Best Practice Default
+  # ingress_application_gateway{
+  #   gateway_id    - (Optional) The ID of the Application Gateway to integrate with the ingress controller of this Kubernetes Cluster. See this page for further details.
+  #   subnet_id     - (Optional) The ID of the subnet on which to create an Application Gateway, which in turn will be integrated with the ingress controller of this Kubernetes Cluster. See this page for further details.
+  #   #gateway_name - (Optional) The name of the Application Gateway to be used or created in the Nodepool Resource Group, which in turn will be integrated with the ingress controller of this Kubernetes Cluster. See this page for further details.
+  #   #subnet_cidr  - (Optional) The subnet CIDR to be used to create an Application Gateway, which in turn will be integrated with the ingress controller of this Kubernetes Cluster. See this page for further details.
+  # }
+  # api_server_access_profile {
+  #   vnet_integration_enabled  = true # - (Optional) Should API Server VNet Integration be enabled? For more details please visit Use API Server VNet Integration.
+  #   subnet_id                 = azurerm_subnet.backend_service_subnet.id #(Optional) The ID of the Subnet where the API server endpoint is delegated to.
+  #   #authorized_ip_ranges - (Optional) Set of authorized IP ranges to allow access to API server, e.g. ["198.51.100.0/24"].
+  # }
+  #   workload_autoscaler_profile {                       # Keda autoscaler
+  #   keda_enabled                    = true
+  #   vertical_pod_autoscaler_enabled = true
+  # }
 }
 output "aks_cluster_id" {
   value = azurerm_kubernetes_cluster.aks_cluster.id
