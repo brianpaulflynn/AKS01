@@ -16,7 +16,7 @@ module "aks_node_pool_1" {
   kubernetes_cluster_id = module.aks_cluster.aks_cluster_id
   vnet_subnet_id        = module.aks_subnets.aks_node_subnet_ids["aks_user_pool_1"]
   pod_subnet_id         = module.aks_subnets.aks_pod_subnet_ids["aks_user_pool_1"]
-  max_pods              = 32 # Needs to be determined by network math. 2^(node_mask/pod_mask)
+  max_pods              = 32 # Needs to be determined by network math. 2^(node_mask-pod_mask)
   # ex: /27 & /22 are /5 apart.  That makes for 32:1 pods:nodes.
   #     /29 is the smallest Azure subnet. Provides 3 usable IPs.
   # CONSIDER: holding back in modules defined to expose configured skus to developers.
