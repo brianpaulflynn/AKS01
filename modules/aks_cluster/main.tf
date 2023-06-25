@@ -1,5 +1,7 @@
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
-  identity { # Managed Identity
+  location            = var.aks_config.location #module!
+  resource_group_name = var.aks_config.rg       #module!
+  identity {                                    # Managed Identity
     type         = "UserAssigned"
     identity_ids = var.aks_managed_identity_ids
   }
@@ -40,8 +42,6 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     max_count                    = var.aks_config.default_node_pool_max_count       #= 3
     max_pods                     = var.aks_config.default_node_pool_max_pods        #= 32
   }
-  location                      = var.aks_config.location
-  resource_group_name           = var.aks_config.rg
   name                          = var.aks_config.name
   node_resource_group           = var.aks_config.nodes_rg
   dns_prefix                    = var.aks_config.dns_prefix
