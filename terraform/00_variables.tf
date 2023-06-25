@@ -77,7 +77,7 @@ variable "aks_config" {
         node_address_prefixes = ["10.0.124.0/27"]
         pod_address_prefixes  = ["10.0.132.0/22"]
         max_pods              = 32 # Needs to be determined by network math. 2^(node_mask-pod_mask)
-        # ex: /27 & /22 are /5 apart.  That makes for 32:1 pods:nodes.
+        # ex: /27 & /22 are /5 apart.  2^(27-22) = 2^5 That makes for 32:1 pods:nodes.
         #     /29 is the smallest Azure subnet. Provides 3 usable IPs.
         name                = "pool1"
         Environment         = "Pool1Tag"
@@ -92,7 +92,7 @@ variable "aks_config" {
         node_address_prefixes = ["10.0.124.32/27"]
         pod_address_prefixes  = ["10.0.136.0/22"]
         max_pods              = 32 # Needs to be determined by network math. 2^(node_mask-pod_mask)
-        # ex: /27 & /22 are /5 apart.  That makes for 32:1 pods:nodes.
+        # ex: /27 & /22 are /5 apart.  2^(27-22) = 2^5 That makes for 32:1 pods:nodes.
         #     /29 is the smallest Azure subnet. Provides 3 usable IPs.
         name                = "pool2"
         Environment         = "Pool2Tag"
