@@ -1,6 +1,5 @@
 # AKS01
 ![Alt text](TerraformApplied.png)
-![Alt text](ClusterOverview.png)
 ![Alt text](ClusterConfig.png)
 ![Alt text](Networking.png)
 ![Alt text](NodePools.png)
