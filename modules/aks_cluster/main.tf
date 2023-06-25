@@ -1,7 +1,13 @@
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
   location            = var.aks_config.location #module!
   resource_group_name = var.aks_config.rg       #module!
-  identity {                                    # Managed Identity
+  #role_based_access_control_enabled = true           # does this conflict with azure_rbac_enabled?
+  azure_active_directory_role_based_access_control { # AAD interated
+    azure_rbac_enabled     = true                    # with RBAC permissions granularity
+    managed                = true                    # managed by AD Group
+    admin_group_object_ids = [var.AD_GROUP_ID]       # from TF_VARS
+  }                                                  # for some AAD group identifier
+  identity {                                         # Managed Identity
     type         = "UserAssigned"
     identity_ids = var.aks_managed_identity_ids
   }
@@ -22,12 +28,6 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   azure_policy_enabled      = true # Best Practice
   open_service_mesh_enabled = true # Best Practice
   local_account_disabled    = true # Best Practice. And required by AAD integration.
-  #role_based_access_control_enabled = true           # does this conflict with azure_rbac_enabled?
-  azure_active_directory_role_based_access_control { # AAD interated
-    azure_rbac_enabled     = true                    # with RBAC permissions granularity
-    managed                = true                    # managed by AD Group
-    admin_group_object_ids = [var.AD_GROUP_ID]       # from TF_VARS
-  }                                                  # for some AAD group identifier
   default_node_pool {
     # Locked In / Non-Configurable
     vnet_subnet_id               = var.vnet_subnet_ids["aks_default_pool"] #subnet_ids["aks_default_pool"]       # <=== !!! Need to fix for new subnet change
