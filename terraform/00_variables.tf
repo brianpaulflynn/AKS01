@@ -47,8 +47,8 @@ variable "aks_config" {
     name                              = "aks-cluster"
     vnet_name                         = "aks-cluster-vnet"
     dns_prefix                        = "aks-cluster-dns"
-    default_node_pool_zones           = [1, 2, 3]
     default_node_pool_name            = "default"
+    default_node_pool_zones           = [1, 2, 3]
     default_node_pool_os_disk_size_gb = 30
     default_node_pool_min_count       = 1
     default_node_pool_max_count       = 3
