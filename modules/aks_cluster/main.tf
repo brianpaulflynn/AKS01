@@ -18,16 +18,16 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   microsoft_defender { # Defender
     log_analytics_workspace_id = var.aks_log_analytics_workspace_id
   }
-  network_profile {          # CNI Networking
-    network_plugin = "azure" # ...
-    network_policy = "azure" # Not Calico
+  azure_policy_enabled      = true # Best Practice
+  open_service_mesh_enabled = true # Best Practice
+  local_account_disabled    = true # Best Practice. And required by AAD integration.
+  network_profile {                # CNI Networking
+    network_plugin = "azure"       # ...
+    network_policy = "azure"       # Not Calico
     outbound_type  = var.aks_config.loadBalancer_type
     service_cidr   = var.aks_config.service_cidr
     dns_service_ip = var.aks_config.service_dns
   }
-  azure_policy_enabled      = true # Best Practice
-  open_service_mesh_enabled = true # Best Practice
-  local_account_disabled    = true # Best Practice. And required by AAD integration.
   default_node_pool {
     # Locked In / Non-Configurable
     vnet_subnet_id               = var.vnet_subnet_ids["aks_default_pool"] #subnet_ids["aks_default_pool"]       # <=== !!! Need to fix for new subnet change
