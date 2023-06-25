@@ -29,7 +29,8 @@ module "aks_cluster" {
   pod_subnet_ids                 = module.aks_subnets.aks_pod_subnet_ids
   aks_managed_identity_ids       = [module.aks_cluster_identity.identity_id]
 }
-module "aks_node_pool_1" {
+# Define User Pools
+module "aks_user_pool_1" {
   source                = "../modules/aks_node_pool"
   for_each              = var.aks_config.node_pool_map
   kubernetes_cluster_id = module.aks_cluster.aks_cluster_id
