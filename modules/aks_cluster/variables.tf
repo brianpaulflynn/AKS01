@@ -31,21 +31,18 @@ variable "aks_config" {
     node_pool_map = map(object({
       node_address_prefixes = list(string)
       pod_address_prefixes  = list(string)
+      max_pods              = string
       name                  = string
       Environment           = string
+      vm_size               = string
+      os_disk_size_gb       = string
+      zones                 = list(number)
+      enable_auto_scaling   = string
       min_count             = string
       max_count             = string
     }))
-    #aks_log_analytics_workspace_id    = string
-    # subnets_map = map(object({
-    #   address_prefixes        = list(string)
-    #   service_delegation_name = optional(string)
-    #   actions                 = optional(list(string))
-    #   }
-    #   )
-    # )
-    }
-  )
+
+  })
   default = {
     default_node_pool_sku             = "Standard_B2s"
     log_analytics_workspace_sku       = "PerGB2018"
@@ -56,9 +53,6 @@ variable "aks_config" {
     name                              = "aks-cluster-name"
     vnet_name                         = "aks-cluster-vnet"
     dns_prefix                        = "aks-cluster-dns"
-    service_cidr                      = "10.255.0.0/16"
-    service_dns                       = "10.255.0.4"
-    vnet_cidr                         = "10.0.0.0/16"
     default_node_pool_zones           = [1, 2, 3]
     default_node_pool_name            = "default"
     default_node_pool_os_disk_size_gb = 30
@@ -68,74 +62,54 @@ variable "aks_config" {
     run_command_enabled               = false # Best Practice for Prodcution Servers
     public_network_access_enabled     = false # Best Practice Default
     private_cluster_enabled           = true  # Best Practice Default
-    #aks_log_analytics_workspace_id    = null
+    service_cidr                      = "10.255.0.0/16"
+    service_dns                       = "10.255.0.4"
+    vnet_cidr                         = "10.0.0.0/16"
     node_pool_map = {
       aks_default_pool = {
-        node_address_prefixes = ["10.0.124.0/27"]
-        pod_address_prefixes  = ["10.0.132.0/22"]
-        name                  = "pool1"
-        Environment           = "Pool1Tag"
+        node_address_prefixes = ["10.0.1.0/24"]
+        pod_address_prefixes  = ["10.0.128.0/22"]
+        max_pods              = 32 # Needs to be determined by network math. 2^(node_mask-pod_mask)
+        name                  = "default"
+        Environment           = "defaultTag"
+        vm_size               = "Standard_B2s"
+        enable_auto_scaling   = true
+        os_disk_size_gb       = 30
+        zones                 = [1, 2, 3]
         min_count             = 1
         max_count             = 3
       }
-      node_pool_1 = {
+      aks_user_pool_1 = {
         node_address_prefixes = ["10.0.124.0/27"]
         pod_address_prefixes  = ["10.0.132.0/22"]
-        name                  = "pool1"
-        Environment           = "Pool1Tag"
-        min_count             = 1
-        max_count             = 3
+        max_pods              = 32 # Needs to be determined by network math. 2^(node_mask-pod_mask)
+        # ex: /27 & /22 are /5 apart.  That makes for 32:1 pods:nodes.
+        #     /29 is the smallest Azure subnet. Provides 3 usable IPs.
+        name                = "pool1"
+        Environment         = "Pool1Tag"
+        vm_size             = "Standard_B2s"
+        enable_auto_scaling = true
+        os_disk_size_gb     = 30
+        zones               = [1, 2, 3]
+        min_count           = 1
+        max_count           = 3
       },
-      node_pool_2 = {
+      aks_user_pool_2 = {
         node_address_prefixes = ["10.0.124.32/27"]
         pod_address_prefixes  = ["10.0.136.0/22"]
-        name                  = "pool2"
-        Environment           = "Pool2Tag"
-        min_count             = 1
-        max_count             = 3
+        max_pods              = 32 # Needs to be determined by network math. 2^(node_mask-pod_mask)
+        # ex: /27 & /22 are /5 apart.  That makes for 32:1 pods:nodes.
+        #     /29 is the smallest Azure subnet. Provides 3 usable IPs.
+        name                = "pool2"
+        Environment         = "Pool2Tag"
+        vm_size             = "Standard_B2s"
+        enable_auto_scaling = true
+        zones               = [1, 2, 3]
+        os_disk_size_gb     = 30
+        min_count           = 1
+        max_count           = 3
       }
     }
-    # subnets_map = {                                                             # This could move out of the config.
-    #   aks_default_pool = {
-    #     address_prefixes        = ["10.0.1.0/24"]                               # after subnets_map[x].address_prefixes is freed up.
-    #     service_delegation_name = null                                          # But rem to define default node pool separately!
-    #     actions                 = null                                          # it doesn't need the same service delegation.
-    #   },                                                                        # Now, instead of subnets_map, we need
-    #   aks_firewall_subnet = {                                                   # node_pool_map.node_address_prefixes[x]
-    #     address_prefixes        = ["10.0.0.0/24"]                               # and node_pool_map.pod_address_prefixes.
-    #     service_delegation_name = "Microsoft.ContainerService/managedClusters"  # Therefore, we need a single subnet definition for
-    #     actions                 = ["Microsoft.Network/networkinterfaces/*"]     # the default_node_pool, and another for it's pod pool.
-    #   },                                                                        # And then we'll need a for-each to go over
-    #   aks_backend_service_subnet = {                                            # the nodes. And another for each of the node's pods.
-    #     address_prefixes        = ["10.0.2.0/24"]
-    #     service_delegation_name = "Microsoft.ContainerService/managedClusters"
-    #     actions                 = ["Microsoft.Network/networkinterfaces/*"]
-    #   },
-    #   aks_node_subnet_1 = {
-    #     address_prefixes        = ["10.0.124.0/27"]
-    #     service_delegation_name = "Microsoft.ContainerService/managedClusters"
-    #     actions                 = ["Microsoft.Network/networkinterfaces/*"]
-    #   },
-    #   aks_node_subnet_2 = {
-    #     address_prefixes        = ["10.0.124.32/27"]
-    #     service_delegation_name = "Microsoft.ContainerService/managedClusters"
-    #     actions                 = ["Microsoft.Network/networkinterfaces/*"]
-    #   },
-    #   aks_default_pod_pool = {
-    #     address_prefixes        = ["10.0.128.0/22"]
-    #     service_delegation_name = "Microsoft.ContainerService/managedClusters"
-    #     actions                 = ["Microsoft.Network/networkinterfaces/*"]
-    #   },
-    #   aks_pod_subnet_1 = {
-    #     address_prefixes        = ["10.0.132.0/22"]
-    #     service_delegation_name = "Microsoft.ContainerService/managedClusters"
-    #     actions                 = ["Microsoft.Network/networkinterfaces/*"]
-    #   },
-    #   aks_pod_subnet_2 = {
-    #     address_prefixes        = ["10.0.136.0/22"]
-    #     service_delegation_name = "Microsoft.ContainerService/managedClusters"
-    #     actions                 = ["Microsoft.Network/networkinterfaces/*"]
-    #   },
-    # }
   }
 }
+
