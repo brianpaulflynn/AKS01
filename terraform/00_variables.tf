@@ -38,7 +38,6 @@ variable "aks_config" {
 
   })
   default = {
-    default_node_pool_sku             = "Standard_B2s"
     log_analytics_workspace_sku       = "PerGB2018"
     loadBalancer_type                 = "loadBalancer"
     location                          = "eastus"
@@ -48,6 +47,7 @@ variable "aks_config" {
     vnet_name                         = "aks-cluster-vnet"
     dns_prefix                        = "aks-cluster-dns"
     default_node_pool_name            = "default"
+    default_node_pool_sku             = "Standard_B2s"
     default_node_pool_zones           = [1, 2, 3]
     default_node_pool_os_disk_size_gb = 30
     default_node_pool_min_count       = 1
