@@ -35,7 +35,7 @@ module "subnets_nsg_associations_pods" {
 # Define the network security rules
 module "allow_pod_subnet_outbound" {
   source                      = "../modules/nsr"
-  name                        = "pod-subnet-outbound"
+  name                        = "allow-pod-subnet-outbound"
   resource_group_name         = module.aks_cluster_rg.rg_name
   network_security_group_name = module.aks_nsg.network_security_group_name
   priority                    = 100
