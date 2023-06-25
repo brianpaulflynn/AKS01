@@ -1,5 +1,4 @@
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
-  # Locked In / Non-Configurable
   identity { # Managed Identity
     type         = "UserAssigned"
     identity_ids = var.aks_managed_identity_ids
@@ -33,16 +32,14 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     pod_subnet_id                = var.pod_subnet_ids["aks_default_pool"]  #subnet_ids["aks_default_pod_pool"]        # <=== !!! Need to fix for new subnet change
     only_critical_addons_enabled = true                                    # Best Practice
     enable_auto_scaling          = true                                    # Scale for cost savings
-    # # Configurable by module
-    zones           = var.aks_config.default_node_pool_zones # [ 1 , 2 , 3 ]   # Use all 3 AZ for max SLA
-    vm_size         = var.aks_config.default_node_pool_sku
-    name            = var.aks_config.default_node_pool_name            #"default"
-    os_disk_size_gb = var.aks_config.default_node_pool_os_disk_size_gb #= 30
-    min_count       = var.aks_config.default_node_pool_min_count       #= 1
-    max_count       = var.aks_config.default_node_pool_max_count       #= 3
-    max_pods        = var.aks_config.default_node_pool_max_pods        #= 32
+    zones                        = var.aks_config.default_node_pool_zones  # [ 1 , 2 , 3 ]   # Use all 3 AZ for max SLA
+    vm_size                      = var.aks_config.default_node_pool_sku
+    name                         = var.aks_config.default_node_pool_name            #"default"
+    os_disk_size_gb              = var.aks_config.default_node_pool_os_disk_size_gb #= 30
+    min_count                    = var.aks_config.default_node_pool_min_count       #= 1
+    max_count                    = var.aks_config.default_node_pool_max_count       #= 3
+    max_pods                     = var.aks_config.default_node_pool_max_pods        #= 32
   }
-  # Configurable by module
   location                      = var.aks_config.location
   resource_group_name           = var.aks_config.rg
   name                          = var.aks_config.name
@@ -62,7 +59,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   #   subnet_id                 = azurerm_subnet.backend_service_subnet.id #(Optional) The ID of the Subnet where the API server endpoint is delegated to.
   #   #authorized_ip_ranges - (Optional) Set of authorized IP ranges to allow access to API server, e.g. ["198.51.100.0/24"].
   # }
-  #   workload_autoscaler_profile {                       # Keda autoscaler
+  #   workload_autoscaler_profile {                                             # Keda autoscaler
   #   keda_enabled                    = true
   #   vertical_pod_autoscaler_enabled = true
   # }
