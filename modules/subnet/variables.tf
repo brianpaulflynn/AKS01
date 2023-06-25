@@ -1,9 +1,3 @@
-variable "resource_group_name" {
-    type    = string
-}
-variable "virtual_network_name" {
-    type    = string
-}
 variable "node_pool_map" {
     type    = map(object({
                 node_address_prefixes = list(string)
@@ -14,6 +8,13 @@ variable "node_pool_map" {
                 max_count             = string
               }))
 }
+variable "resource_group_name" {
+    type    = string
+}
+variable "virtual_network_name" {
+    type    = string
+}
+
 
 # variable "aks_config" {
 #   type = object({
@@ -80,7 +81,7 @@ variable "node_pool_map" {
 #     private_cluster_enabled           = true  # Best Practice Default
 #     #aks_log_analytics_workspace_id    = null
 #     node_pool_map = {
-#       aks_default_node_pool = {
+#       aks_default_pool = {
 #         node_address_prefixes = ["10.0.124.0/27"]
 #         pod_address_prefixes  = ["10.0.132.0/22"]
 #         name                  = "pool1"
@@ -106,7 +107,7 @@ variable "node_pool_map" {
 #         }
 #     }
 #     # subnets_map = {                                                             # This could move out of the config.
-#     #   aks_default_node_pool = {
+#     #   aks_default_pool = {
 #     #     address_prefixes        = ["10.0.1.0/24"]                               # after subnets_map[x].address_prefixes is freed up.
 #     #     service_delegation_name = null                                          # But rem to define default node pool separately!
 #     #     actions                 = null                                          # it doesn't need the same service delegation.

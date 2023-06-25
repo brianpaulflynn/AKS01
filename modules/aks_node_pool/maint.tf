@@ -1,4 +1,4 @@
-resource "azurerm_kubernetes_cluster_node_pool" "node_pool_1" {
+resource "azurerm_kubernetes_cluster_node_pool" "this" {
   kubernetes_cluster_id = var.kubernetes_cluster_id
   vnet_subnet_id        = var.vnet_subnet_id
   pod_subnet_id         = var.pod_subnet_id

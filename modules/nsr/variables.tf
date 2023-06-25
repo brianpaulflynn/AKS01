@@ -1,6 +1,6 @@
-variable "name" { type = string }
 variable "resource_group_name" { type = string }
 variable "network_security_group_name" { type = string }
+variable "name" { type = string }
 variable "priority"  { type = string }
 variable "direction"  { type = string }
 variable "access"  { type = string }
@@ -9,6 +9,8 @@ variable "source_port_range"  { type = string }
 variable "destination_port_range"  { type = string }
 variable "source_address_prefixes"  { type = list(string) }
 variable "destination_address_prefixes"  { type = list(string) }
+
+
 # variable "node_pool_map" {
 #     type    = map(object({
 #                 node_address_prefixes = list(string)
@@ -19,6 +21,7 @@ variable "destination_address_prefixes"  { type = list(string) }
 #                 max_count             = string
 #               }))
 # }
+
 # variable "aks_config" {
 #   type = object({
 #     default_node_pool_sku             = string
@@ -84,7 +87,7 @@ variable "destination_address_prefixes"  { type = list(string) }
 #     private_cluster_enabled           = true  # Best Practice Default
 #     #aks_log_analytics_workspace_id    = null
 #     node_pool_map = {
-#       aks_default_node_pool = {
+#       aks_default_pool = {
 #         node_address_prefixes = ["10.0.124.0/27"]
 #         pod_address_prefixes  = ["10.0.132.0/22"]
 #         name                  = "pool1"
@@ -110,7 +113,7 @@ variable "destination_address_prefixes"  { type = list(string) }
 #         }
 #     }
 #     # subnets_map = {                                                             # This could move out of the config.
-#     #   aks_default_node_pool = {
+#     #   aks_default_pool = {
 #     #     address_prefixes        = ["10.0.1.0/24"]                               # after subnets_map[x].address_prefixes is freed up.
 #     #     service_delegation_name = null                                          # But rem to define default node pool separately!
 #     #     actions                 = null                                          # it doesn't need the same service delegation.
