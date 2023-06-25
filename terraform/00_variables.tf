@@ -50,9 +50,6 @@ variable "aks_config" {
     name                              = "aks-cluster-name"
     vnet_name                         = "aks-cluster-vnet"
     dns_prefix                        = "aks-cluster-dns"
-    service_cidr                      = "10.255.0.0/16"
-    service_dns                       = "10.255.0.4"
-    vnet_cidr                         = "10.0.0.0/16"
     default_node_pool_zones           = [1, 2, 3]
     default_node_pool_name            = "default"
     default_node_pool_os_disk_size_gb = 30
@@ -62,7 +59,9 @@ variable "aks_config" {
     run_command_enabled               = false # Best Practice for Prodcution Servers
     public_network_access_enabled     = false # Best Practice Default
     private_cluster_enabled           = true  # Best Practice Default
-    #aks_log_analytics_workspace_id    = null
+    service_cidr                      = "10.255.0.0/16"
+    service_dns                       = "10.255.0.4"
+    vnet_cidr                         = "10.0.0.0/16"
     node_pool_map = {
       aks_default_pool = {
         node_address_prefixes = ["10.0.1.0/24"]
