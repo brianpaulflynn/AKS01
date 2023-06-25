@@ -1,10 +1,10 @@
 # AKS01
-![Alt text](TerraformApplied.png)
-![Alt text](ClusterConfig.png)
-![Alt text](Networking.png)
-![Alt text](NodePools.png)
-![Alt text](NSGs.png)
-![Alt text](Subnets.png)
+![Alt text](./images/TerraformApplied.png)
+![Alt text](./images/ClusterConfig.png)
+![Alt text](./images/Networking.png)
+![Alt text](./images/NodePools.png)
+![Alt text](./images/NSGs.png)
+![Alt text](./images/Subnets.png)
 
 
 
