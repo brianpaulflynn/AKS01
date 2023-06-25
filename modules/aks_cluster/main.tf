@@ -28,6 +28,12 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     service_cidr   = var.aks_config.service_cidr
     dns_service_ip = var.aks_config.service_dns
   }
+  name                          = var.aks_config.name
+  node_resource_group           = var.aks_config.nodes_rg
+  dns_prefix                    = var.aks_config.dns_prefix
+  run_command_enabled           = var.aks_config.run_command_enabled           # false # Best Practice for Prodcution Servers
+  public_network_access_enabled = var.aks_config.public_network_access_enabled # false # Best Practice Default
+  private_cluster_enabled       = var.aks_config.private_cluster_enabled       # true  # Best Practice Default
   default_node_pool {
     # Locked In / Non-Configurable
     vnet_subnet_id               = var.vnet_subnet_ids["aks_default_pool"]
@@ -42,12 +48,6 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     max_count                    = var.aks_config.default_node_pool_max_count
     max_pods                     = var.aks_config.default_node_pool_max_pods
   }
-  name                          = var.aks_config.name
-  node_resource_group           = var.aks_config.nodes_rg
-  dns_prefix                    = var.aks_config.dns_prefix
-  run_command_enabled           = var.aks_config.run_command_enabled           # false # Best Practice for Prodcution Servers
-  public_network_access_enabled = var.aks_config.public_network_access_enabled # false # Best Practice Default
-  private_cluster_enabled       = var.aks_config.private_cluster_enabled       # true  # Best Practice Default
   # ingress_application_gateway{
   #   gateway_id    - (Optional) The ID of the Application Gateway to integrate with the ingress controller of this Kubernetes Cluster. See this page for further details.
   #   subnet_id     - (Optional) The ID of the subnet on which to create an Application Gateway, which in turn will be integrated with the ingress controller of this Kubernetes Cluster. See this page for further details.
