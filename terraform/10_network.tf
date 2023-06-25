@@ -52,7 +52,7 @@ module "allow_pod_subnet_outbound" {
 }
 module "allow_pod_to_pod" {
   source                      = "../modules/nsr"
-  name                        = "pod-to-pod-inbound"
+  name                        = "allow-pod-to-pod-inbound"
   resource_group_name         = module.aks_cluster_rg.rg_name
   network_security_group_name = module.aks_nsg.network_security_group_name
   priority                    = 100
