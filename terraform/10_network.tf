@@ -19,13 +19,14 @@ module "aks_nsg" {
   location            = module.aks_cluster_rg.rg_location
   name                = "${var.aks_config.name}-nsg"
 }
-# Define the NSG associations for each subnet
+# Define the NSG associations for each node subnet
 module "subnets_nsg_associations_nodes" {
   source                    = "../modules/nsga"
   for_each                  = module.aks_subnets.aks_node_subnet_ids
   subnet_id                 = module.aks_subnets.aks_node_subnet_ids[each.key]
   network_security_group_id = module.aks_nsg.network_security_group_id
 }
+# Define the NSG associations for each pod subnet
 module "subnets_nsg_associations_pods" {
   source                    = "../modules/nsga"
   for_each                  = module.aks_subnets.aks_pod_subnet_ids
