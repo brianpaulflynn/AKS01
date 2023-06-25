@@ -91,8 +91,7 @@ module "deny_node_to_pod_subnet" {
   )
 }
 module "deny_pod_to_node_subnet" {
-  source = "../modules/nsr"
-  #node_pool_map               = module.aks_subnets.aks_config.node_pool_map
+  source                      = "../modules/nsr"
   name                        = "deny-pod-to-node-subnet"
   resource_group_name         = module.aks_cluster_rg.rg_name
   network_security_group_name = module.aks_nsg.network_security_group_name

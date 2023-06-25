@@ -1,4 +1,4 @@
-variable "AD_GROUP_ID" { type = string }
+variable "AD_GROUP_ID" { type = string } # TF_VAR
 variable "aks_config" {
   type = object({
     default_node_pool_sku             = string
