@@ -25,21 +25,18 @@ variable "aks_config" {
     node_pool_map = map(object({
       node_address_prefixes = list(string)
       pod_address_prefixes  = list(string)
+      max_pods              = string
       name                  = string
       Environment           = string
+      vm_size               = string
+      os_disk_size_gb       = string
+      zones                 = list(number)
+      enable_auto_scaling   = string
       min_count             = string
       max_count             = string
     }))
-    #aks_log_analytics_workspace_id    = string
-    # subnets_map = map(object({
-    #   address_prefixes        = list(string)
-    #   service_delegation_name = optional(string)
-    #   actions                 = optional(list(string))
-    #   }
-    #   )
-    # )
-    }
-  )
+
+  })
   default = {
     default_node_pool_sku             = "Standard_B2s"
     log_analytics_workspace_sku       = "PerGB2018"
@@ -66,27 +63,47 @@ variable "aks_config" {
       aks_default_pool = {
         node_address_prefixes = ["10.0.1.0/24"]
         pod_address_prefixes  = ["10.0.128.0/22"]
-        name                  = "pool1"
-        Environment           = "Pool1Tag"
+        max_pods              = 32 # Needs to be determined by network math. 2^(node_mask-pod_mask)
+        name                  = "default"
+        Environment           = "defaultTag"
+        vm_size               = "Standard_B2s"
+        enable_auto_scaling   = true
+        os_disk_size_gb       = 30
+        zones                 = [1, 2, 3]
         min_count             = 1
         max_count             = 3
       }
       aks_user_pool_1 = {
         node_address_prefixes = ["10.0.124.0/27"]
         pod_address_prefixes  = ["10.0.132.0/22"]
-        name                  = "pool1"
-        Environment           = "Pool1Tag"
-        min_count             = 1
-        max_count             = 3
+        max_pods              = 32 # Needs to be determined by network math. 2^(node_mask-pod_mask)
+        # ex: /27 & /22 are /5 apart.  2^(27-22) = 2^5 That makes for 32:1 pods:nodes.
+        #     /29 is the smallest Azure subnet. Provides 3 usable IPs.
+        name                = "pool1"
+        Environment         = "Pool1Tag"
+        vm_size             = "Standard_B2s"
+        enable_auto_scaling = true
+        os_disk_size_gb     = 30
+        zones               = [1, 2, 3]
+        min_count           = 1
+        max_count           = 3
       },
       aks_user_pool_2 = {
         node_address_prefixes = ["10.0.124.32/27"]
         pod_address_prefixes  = ["10.0.136.0/22"]
-        name                  = "pool2"
-        Environment           = "Pool2Tag"
-        min_count             = 1
-        max_count             = 3
+        max_pods              = 32 # Needs to be determined by network math. 2^(node_mask-pod_mask)
+        # ex: /27 & /22 are /5 apart.  2^(27-22) = 2^5 That makes for 32:1 pods:nodes.
+        #     /29 is the smallest Azure subnet. Provides 3 usable IPs.
+        name                = "pool2"
+        Environment         = "Pool2Tag"
+        vm_size             = "Standard_B2s"
+        enable_auto_scaling = true
+        zones               = [1, 2, 3]
+        os_disk_size_gb     = 30
+        min_count           = 1
+        max_count           = 3
       }
     }
   }
 }
+
