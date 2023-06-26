@@ -39,6 +39,7 @@ module "subnets_nsg_associations_pods" {
   subnet_id                 = module.aks_subnets.aks_pod_subnet_ids[each.key]
   network_security_group_id = module.aks_nsg.network_security_group_id
 }
+# Define Network Security Group Rules for the AKS vnet
 module "aks_nsrs" {
   source                      = "../modules/aks_nsrs"
   node_pool_map               = var.aks_config.node_pool_map
