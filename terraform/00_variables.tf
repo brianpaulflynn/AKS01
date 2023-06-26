@@ -61,7 +61,7 @@ variable "aks_config" {
     vnet_cidr                         = "10.0.0.0/16"
     node_pool_map = {
       aks_default_pool = {
-        node_address_prefixes = ["10.0.1.0/24"]
+        node_address_prefixes = ["10.0.123.224/27"]
         pod_address_prefixes  = ["10.0.128.0/22"]
         max_pods              = 32 # Needs to be determined by network math. 2^(node_mask-pod_mask)
         name                  = "default"
