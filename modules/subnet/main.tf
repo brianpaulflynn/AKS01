@@ -5,9 +5,8 @@ resource "azurerm_subnet" "aks_node_subnets" {
   name                 = "${each.key}_nodes"              # <=== NODES!
   address_prefixes     = each.value.node_address_prefixes # <=== NODES!
   dynamic "delegation" {                                  # Grant cluster access to manage subnets
-    # rem no delegation for default node pool!
-    for_each = each.key != "aks_default_pool" ? ["${each.key}_delegation"] : []
-    content {
+    for_each = each.key != "aks_default_pool" ? [each.key] : []
+    content { # rem no delegation for default node pool
       name = "${each.key}_delegation"
       service_delegation {
         name    = "Microsoft.ContainerService/managedClusters"
@@ -27,9 +26,8 @@ resource "azurerm_subnet" "aks_pod_subnets" {
   address_prefixes     = each.value.pod_address_prefixes # <=== PODS!
 
   dynamic "delegation" { # Grant cluster access to manage subnets
-    # delegation required on all pod pools, even default... this needs to be cleaner
-    for_each = each.key != "fdsafdsa" ? ["${each.key}_delegation"] : []
-    content {
+    for_each = each.key != "aks_default_pool" ? [each.key] : []
+    content { # rem no delegation for default node pool
       name = "${each.key}_delegation"
       service_delegation {
         name    = "Microsoft.ContainerService/managedClusters"

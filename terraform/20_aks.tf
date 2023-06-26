@@ -24,10 +24,10 @@ module "aks_cluster" {
   aks_managed_identity_ids       = [module.aks_cluster_identity.identity_id]
 }
 #Define User Pools
-module "aks_user_pool_1" {
+module "aks_user_pools" {
   source                = "../modules/aks_node_pool"
-  for_each              = var.aks_config.node_pool_map
   kubernetes_cluster_id = module.aks_cluster.aks_cluster_id
+  for_each              = { for k, v in var.aks_config.node_pool_map : k => v if k != "aks_default_pool" }
   vnet_subnet_id        = module.aks_subnets.aks_node_subnet_ids[each.key]
   pod_subnet_id         = module.aks_subnets.aks_pod_subnet_ids[each.key]
   vm_size               = var.aks_config.node_pool_map[each.key].vm_size
