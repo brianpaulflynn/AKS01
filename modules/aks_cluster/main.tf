@@ -35,7 +35,6 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   public_network_access_enabled = var.aks_config.public_network_access_enabled
   private_cluster_enabled       = var.aks_config.private_cluster_enabled
   default_node_pool {
-    # Locked In / Non-Configurable
     vnet_subnet_id               = var.vnet_subnet_ids["aks_default_pool"]
     pod_subnet_id                = var.pod_subnet_ids["aks_default_pool"]
     only_critical_addons_enabled = true
