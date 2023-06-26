@@ -1,7 +1,7 @@
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
-  location            = var.aks_config.location #module!
-  resource_group_name = var.aks_config.rg       #module!
-  #role_based_access_control_enabled = true           # does this conflict with azure_rbac_enabled?
+  location            = var.aks_config.location
+  resource_group_name = var.aks_config.rg
+  #role_based_access_control_enabled = true          # does this conflict with azure_rbac_enabled?
   azure_active_directory_role_based_access_control { # AAD interated
     azure_rbac_enabled     = true                    # with RBAC permissions granularity
     managed                = true                    # managed by AD Group
@@ -31,9 +31,9 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   name                          = var.aks_config.name
   node_resource_group           = var.aks_config.nodes_rg
   dns_prefix                    = var.aks_config.dns_prefix
-  run_command_enabled           = var.aks_config.run_command_enabled           # false # Best Practice for Prodcution Servers
-  public_network_access_enabled = var.aks_config.public_network_access_enabled # false # Best Practice Default
-  private_cluster_enabled       = var.aks_config.private_cluster_enabled       # true  # Best Practice Default
+  run_command_enabled           = var.aks_config.run_command_enabled
+  public_network_access_enabled = var.aks_config.public_network_access_enabled
+  private_cluster_enabled       = var.aks_config.private_cluster_enabled
   default_node_pool {
     # Locked In / Non-Configurable
     vnet_subnet_id               = var.vnet_subnet_ids["aks_default_pool"]
@@ -59,7 +59,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   #   subnet_id                 = azurerm_subnet.backend_service_subnet.id #(Optional) The ID of the Subnet where the API server endpoint is delegated to.
   #   #authorized_ip_ranges - (Optional) Set of authorized IP ranges to allow access to API server, e.g. ["198.51.100.0/24"].
   # }
-  #   workload_autoscaler_profile {                                             # Keda autoscaler
+  #   workload_autoscaler_profile {           # Keda autoscaler
   #   keda_enabled                    = true
   #   vertical_pod_autoscaler_enabled = true
   # }
