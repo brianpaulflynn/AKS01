@@ -35,8 +35,6 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   public_network_access_enabled = var.aks_config.public_network_access_enabled
   private_cluster_enabled       = var.aks_config.private_cluster_enabled
   default_node_pool {
-    vnet_subnet_id               = var.vnet_subnet_ids["aks_default_pool"]
-    pod_subnet_id                = var.pod_subnet_ids["aks_default_pool"]
     zones                        = var.aks_config.default_node_pool_zones
     vm_size                      = var.aks_config.default_node_pool_sku
     name                         = var.aks_config.default_node_pool_name
@@ -44,6 +42,8 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     min_count                    = var.aks_config.default_node_pool_min_count
     max_count                    = var.aks_config.default_node_pool_max_count
     max_pods                     = var.aks_config.default_node_pool_max_pods
+    vnet_subnet_id               = var.vnet_subnet_ids["aks_default_pool"]
+    pod_subnet_id                = var.pod_subnet_ids["aks_default_pool"]
     only_critical_addons_enabled = true
     enable_auto_scaling          = true
   }
