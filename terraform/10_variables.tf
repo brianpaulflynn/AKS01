@@ -78,12 +78,12 @@ variable "aks_config" {
         max_pods              = 32 # Do not exceed 2^(node_mask-pod_mask)
         # ex: /27 & /22 are /5 apart.  2^(27-22) = 2^5 That makes for 32:1 pods:nodes.
         #     /29 is the smallest Azure subnet. Provides 3 usable IPs.
+        zones               = [1, 2, 3] # A /29 provides 1 per zone
         name                = "pool1"
         Environment         = "Pool1Tag"
         vm_size             = "Standard_B2s"
         enable_auto_scaling = true
         os_disk_size_gb     = 30
-        zones               = [1, 2, 3]
         min_count           = 1
         max_count           = 3
       },
@@ -93,11 +93,11 @@ variable "aks_config" {
         max_pods              = 32 # Needs to be determined by network math. 2^(node_mask-pod_mask)
         # ex: /27 & /22 are /5 apart.  2^(27-22) = 2^5 That makes for 32:1 pods:nodes.
         #     /29 is the smallest Azure subnet. Provides 3 usable IPs.
+        zones               = [1, 2, 3] # A /29 provides 1 per zone
         name                = "pool2"
         Environment         = "Pool2Tag"
         vm_size             = "Standard_B2s"
         enable_auto_scaling = true
-        zones               = [1, 2, 3]
         os_disk_size_gb     = 30
         min_count           = 1
         max_count           = 3
