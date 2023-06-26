@@ -1,6 +1,9 @@
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
-  location            = var.aks_config.location
-  resource_group_name = var.aks_config.rg
+  location                  = var.aks_config.location
+  resource_group_name       = var.aks_config.rg
+  azure_policy_enabled      = true # Best Practice
+  open_service_mesh_enabled = true # Best Practice
+  local_account_disabled    = true # Best Practice. And required by AAD integration.
   #role_based_access_control_enabled = true          # does this conflict with azure_rbac_enabled?
   azure_active_directory_role_based_access_control { # AAD interated
     azure_rbac_enabled     = true                    # with RBAC permissions granularity
@@ -18,12 +21,9 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   microsoft_defender { # Defender
     log_analytics_workspace_id = var.aks_log_analytics_workspace_id
   }
-  azure_policy_enabled      = true # Best Practice
-  open_service_mesh_enabled = true # Best Practice
-  local_account_disabled    = true # Best Practice. And required by AAD integration.
-  network_profile {                # CNI Networking
-    network_plugin = "azure"       # ...
-    network_policy = "azure"       # Not Calico
+  network_profile {          # CNI Networking
+    network_plugin = "azure" # ...
+    network_policy = "azure" # Not Calico
     outbound_type  = var.aks_config.loadBalancer_type
     service_cidr   = var.aks_config.service_cidr
     dns_service_ip = var.aks_config.service_dns
