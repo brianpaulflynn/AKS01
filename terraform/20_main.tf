@@ -42,9 +42,9 @@ module "subnets_nsg_associations_pods" {
 # Define Network Security Group Rules for the AKS vnet
 module "aks_nsrs" {
   source                      = "../modules/aks_nsrs"
-  node_pool_map               = var.aks_config.node_pool_map
   resource_group_name         = module.aks_cluster_rg.rg_name
   network_security_group_name = module.aks_nsg.network_security_group_name
+  node_pool_map               = var.aks_config.node_pool_map
 }
 # Create Azure Log Analytics Workspace
 module "aks_log_analytics" {
