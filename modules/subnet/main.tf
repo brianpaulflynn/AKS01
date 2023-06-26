@@ -24,8 +24,7 @@ resource "azurerm_subnet" "aks_pod_subnets" {
   virtual_network_name = var.virtual_network_name
   name                 = "${each.key}_pods"              # <=== PODS!
   address_prefixes     = each.value.pod_address_prefixes # <=== PODS!
-
-  dynamic "delegation" { # Grant cluster access to manage subnets
+  dynamic "delegation" {                                 # Grant cluster access to manage subnets
     for_each = each.key != "aks_default_pool" ? [each.key] : []
     content { # rem no delegation for default node pool
       name = "${each.key}_delegation"
