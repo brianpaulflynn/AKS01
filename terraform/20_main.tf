@@ -49,27 +49,27 @@ module "aks_nsrs" {
 # Create Azure Log Analytics Workspace
 module "aks_log_analytics" {
   source              = "../modules/log_analytics_workspace"
+  resource_group_name = module.aks_cluster_rg.rg_name
   location            = var.aks_config.location
   sku                 = var.aks_config.log_analytics_workspace_sku
   name                = "${var.aks_config.name}-analytics"
-  resource_group_name = module.aks_cluster_rg.rg_name
 }
 # Create aks cluster identity
 module "aks_cluster_identity" {
+  resource_group_name = module.aks_cluster_rg.rg_name
   source              = "../modules/user_assigned_identity"
   location            = var.aks_config.location
   name                = "${var.aks_config.name}-identity"
-  resource_group_name = module.aks_cluster_rg.rg_name
 }
 # Define AKS Cluster
 module "aks_cluster" {
   source                         = "../modules/aks_cluster"
-  AD_GROUP_ID                    = var.AD_GROUP_ID # TF Env Var
-  aks_config                     = var.aks_config
   aks_log_analytics_workspace_id = module.aks_log_analytics.log_analytics_workspace_id
   vnet_subnet_ids                = module.aks_subnets.aks_node_subnet_ids
   pod_subnet_ids                 = module.aks_subnets.aks_pod_subnet_ids
   aks_managed_identity_ids       = [module.aks_cluster_identity.identity_id]
+  AD_GROUP_ID                    = var.AD_GROUP_ID # TF Env Var
+  aks_config                     = var.aks_config
 }
 #Define User Pools
 module "aks_user_pools" {
