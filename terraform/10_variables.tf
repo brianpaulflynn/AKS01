@@ -62,13 +62,13 @@ variable "aks_config" {
       aks_default_pool = {
         node_address_prefixes = ["10.0.123.224/27"]
         pod_address_prefixes  = ["10.0.128.0/22"]
-        max_pods              = 32 # Needs to be determined by network math. 2^(node_mask-pod_mask)
+        max_pods              = 32        # Needs to be determined by network math. 2^(node_mask-pod_mask)
+        zones                 = [1, 2, 3] # A /29 provides 1 per zone
         name                  = "default"
         Environment           = "defaultTag"
         vm_size               = "Standard_B2s"
         enable_auto_scaling   = true
         os_disk_size_gb       = 30
-        zones                 = [1, 2, 3]
         min_count             = 1
         max_count             = 3
       }
