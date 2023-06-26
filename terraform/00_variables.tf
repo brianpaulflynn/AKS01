@@ -1,4 +1,4 @@
-variable "AD_GROUP_ID" { type = string }
+variable "AD_GROUP_ID" { type = string } # TF_VAR
 variable "aks_config" {
   type = object({
     default_node_pool_sku             = string
@@ -38,17 +38,17 @@ variable "aks_config" {
 
   })
   default = {
-    default_node_pool_sku             = "Standard_B2s"
     log_analytics_workspace_sku       = "PerGB2018"
     loadBalancer_type                 = "loadBalancer"
     location                          = "eastus"
     rg                                = "my_aks_rg"
     nodes_rg                          = "my_nodes_rg"
-    name                              = "aks-cluster-name"
+    name                              = "aks-cluster"
     vnet_name                         = "aks-cluster-vnet"
     dns_prefix                        = "aks-cluster-dns"
-    default_node_pool_zones           = [1, 2, 3]
     default_node_pool_name            = "default"
+    default_node_pool_sku             = "Standard_B2s"
+    default_node_pool_zones           = [1, 2, 3]
     default_node_pool_os_disk_size_gb = 30
     default_node_pool_min_count       = 1
     default_node_pool_max_count       = 3
@@ -107,3 +107,5 @@ variable "aks_config" {
   }
 }
 
+data "azurerm_client_config" "current" {}
+data "azurerm_subscription" "primary" {}

@@ -19,13 +19,14 @@ module "aks_nsg" {
   location            = module.aks_cluster_rg.rg_location
   name                = "${var.aks_config.name}-nsg"
 }
-# Define the NSG associations for each subnet
+# Define the NSG associations for each node subnet
 module "subnets_nsg_associations_nodes" {
   source                    = "../modules/nsga"
   for_each                  = module.aks_subnets.aks_node_subnet_ids
   subnet_id                 = module.aks_subnets.aks_node_subnet_ids[each.key]
   network_security_group_id = module.aks_nsg.network_security_group_id
 }
+# Define the NSG associations for each pod subnet
 module "subnets_nsg_associations_pods" {
   source                    = "../modules/nsga"
   for_each                  = module.aks_subnets.aks_pod_subnet_ids
@@ -35,7 +36,7 @@ module "subnets_nsg_associations_pods" {
 # Define the network security rules
 module "allow_pod_subnet_outbound" {
   source                      = "../modules/nsr"
-  name                        = "pod-subnet-outbound"
+  name                        = "allow-pod-subnet-outbound"
   resource_group_name         = module.aks_cluster_rg.rg_name
   network_security_group_name = module.aks_nsg.network_security_group_name
   priority                    = 100
@@ -52,7 +53,7 @@ module "allow_pod_subnet_outbound" {
 }
 module "allow_pod_to_pod" {
   source                      = "../modules/nsr"
-  name                        = "pod-to-pod-inbound"
+  name                        = "allow-pod-to-pod-inbound"
   resource_group_name         = module.aks_cluster_rg.rg_name
   network_security_group_name = module.aks_nsg.network_security_group_name
   priority                    = 100
@@ -91,8 +92,7 @@ module "deny_node_to_pod_subnet" {
   )
 }
 module "deny_pod_to_node_subnet" {
-  source = "../modules/nsr"
-  #node_pool_map               = module.aks_subnets.aks_config.node_pool_map
+  source                      = "../modules/nsr"
   name                        = "deny-pod-to-node-subnet"
   resource_group_name         = module.aks_cluster_rg.rg_name
   network_security_group_name = module.aks_nsg.network_security_group_name
