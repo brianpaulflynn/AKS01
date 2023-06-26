@@ -39,81 +39,9 @@ module "subnets_nsg_associations_pods" {
   subnet_id                 = module.aks_subnets.aks_pod_subnet_ids[each.key]
   network_security_group_id = module.aks_nsg.network_security_group_id
 }
-# Define the network security rules
-module "allow_pod_subnet_outbound" {
-  source                      = "../modules/nsr"
-  name                        = "allow-pod-subnet-outbound"
+module "aks_nsrs" {
+  source                      = "../modules/aks_nsrs"
+  node_pool_map               = var.aks_config.node_pool_map
   resource_group_name         = module.aks_cluster_rg.rg_name
   network_security_group_name = module.aks_nsg.network_security_group_name
-  priority                    = 100
-  direction                   = "Outbound"
-  access                      = "Allow"
-  protocol                    = "*"
-  source_port_range           = "*"
-  destination_port_range      = "*"
-  source_address_prefixes = concat(
-    var.aks_config.node_pool_map["aks_user_pool_1"].pod_address_prefixes,
-    var.aks_config.node_pool_map["aks_user_pool_2"].pod_address_prefixes
-  )
-  destination_address_prefixes = ["0.0.0.0/0"]
-}
-module "allow_pod_to_pod" {
-  source                      = "../modules/nsr"
-  name                        = "allow-pod-to-pod-inbound"
-  resource_group_name         = module.aks_cluster_rg.rg_name
-  network_security_group_name = module.aks_nsg.network_security_group_name
-  priority                    = 100
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "*"
-  source_port_range           = "*"
-  destination_port_range      = "*"
-  source_address_prefixes = concat(
-    var.aks_config.node_pool_map["aks_user_pool_1"].pod_address_prefixes,
-    var.aks_config.node_pool_map["aks_user_pool_2"].pod_address_prefixes
-  )
-  destination_address_prefixes = concat(
-    var.aks_config.node_pool_map["aks_user_pool_1"].pod_address_prefixes,
-    var.aks_config.node_pool_map["aks_user_pool_2"].pod_address_prefixes
-  )
-}
-module "deny_node_to_pod_subnet" {
-  source                      = "../modules/nsr"
-  name                        = "deny-node-to-pod-subnet"
-  resource_group_name         = module.aks_cluster_rg.rg_name
-  network_security_group_name = module.aks_nsg.network_security_group_name
-  priority                    = 101
-  direction                   = "Inbound"
-  access                      = "Deny"
-  protocol                    = "*"
-  source_port_range           = "*"
-  destination_port_range      = "*"
-  source_address_prefixes = concat(
-    var.aks_config.node_pool_map["aks_user_pool_1"].node_address_prefixes,
-    var.aks_config.node_pool_map["aks_user_pool_2"].node_address_prefixes
-  )
-  destination_address_prefixes = concat(
-    var.aks_config.node_pool_map["aks_user_pool_1"].pod_address_prefixes,
-    var.aks_config.node_pool_map["aks_user_pool_2"].pod_address_prefixes
-  )
-}
-module "deny_pod_to_node_subnet" {
-  source                      = "../modules/nsr"
-  name                        = "deny-pod-to-node-subnet"
-  resource_group_name         = module.aks_cluster_rg.rg_name
-  network_security_group_name = module.aks_nsg.network_security_group_name
-  priority                    = 102
-  direction                   = "Inbound"
-  access                      = "Deny"
-  protocol                    = "*"
-  source_port_range           = "*"
-  destination_port_range      = "*"
-  source_address_prefixes = concat(
-    var.aks_config.node_pool_map["aks_user_pool_1"].pod_address_prefixes,
-    var.aks_config.node_pool_map["aks_user_pool_2"].pod_address_prefixes
-  )
-  destination_address_prefixes = concat(
-    var.aks_config.node_pool_map["aks_user_pool_1"].node_address_prefixes,
-    var.aks_config.node_pool_map["aks_user_pool_2"].node_address_prefixes
-  )
 }

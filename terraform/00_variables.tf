@@ -35,7 +35,6 @@ variable "aks_config" {
       min_count             = string
       max_count             = string
     }))
-
   })
   default = {
     log_analytics_workspace_sku       = "PerGB2018"
