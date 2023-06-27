@@ -1,13 +1,19 @@
 variable "kubernetes_cluster_id" { type = string }
 variable "vnet_subnet_id" { type = string }
 variable "pod_subnet_id" { type = string }
-# add node_pool type def
-variable "enable_auto_scaling" { type = bool }
-variable "name" { type = string }
-variable "vm_size" { type = string }
-variable "os_disk_size_gb" { type = number }
-variable "zones" { type = list(string) }
-variable "min_count" { type = string }
-variable "max_count" { type = string }
-variable "max_pods" { type = string }
-variable "Environment" { type = string }
+variable "node_pool" {
+  type = object({
+    node_address_prefixes = list(string)
+    pod_address_prefixes  = list(string)
+    max_pods              = string
+    name                  = string
+    Environment           = string
+    vm_size               = string
+    os_disk_size_gb       = string
+    zones                 = list(number)
+    enable_auto_scaling   = string
+    min_count             = string
+    max_count             = string
+  })
+}
+
