@@ -77,7 +77,7 @@ module "aks_user_pools" {
   for_each = {
     for k, v
     in var.aks_config.node_pool_map : k => v
-    if k != "aks_default_pool"
+    if k != "aks_default_pool" # excdlude default pool. It is created w/ cluster.
   }
   vnet_subnet_id = module.aks_subnets.aks_node_subnet_ids[each.key]
   pod_subnet_id  = module.aks_subnets.aks_pod_subnet_ids[each.key]
