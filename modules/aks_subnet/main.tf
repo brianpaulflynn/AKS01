@@ -38,4 +38,3 @@ resource "azurerm_subnet" "aks_pod_subnets" {
 output "aks_pod_subnet_ids" {
   value = { for subnet_name, subnet in azurerm_subnet.aks_pod_subnets : subnet_name => subnet.id }
 }
-

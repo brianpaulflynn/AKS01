@@ -48,10 +48,10 @@ variable "aks_config" {
     default_node_pool_name            = "default"
     default_node_pool_sku             = "Standard_B2s"
     default_node_pool_zones           = [1, 2, 3]
-    default_node_pool_os_disk_size_gb = 30
     default_node_pool_min_count       = 1
     default_node_pool_max_count       = 3
-    default_node_pool_max_pods        = 32
+    default_node_pool_max_pods        = 32 # Do not exceed 2^(node_mask-pod_mask)
+    default_node_pool_os_disk_size_gb = 30
     run_command_enabled               = false # Best Practice for Prodcution Servers
     public_network_access_enabled     = false # Best Practice Default
     private_cluster_enabled           = true  # Best Practice Default
