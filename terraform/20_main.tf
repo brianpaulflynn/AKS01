@@ -30,8 +30,7 @@ module "aks_subnets_nsg_associations" {
   source                    = "../modules/nsga"
   network_security_group_id = module.aks_nsg.network_security_group_id
   for_each = {
-    for k, v
-    in concat(
+    for k, v in concat(
       values(module.aks_subnets.aks_pod_subnet_ids), # <=== PODS!
       values(module.aks_subnets.aks_node_subnet_ids) # <=== NODES!
     ) : k => v
