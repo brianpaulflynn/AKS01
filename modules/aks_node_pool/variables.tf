@@ -1,8 +1,8 @@
 variable "kubernetes_cluster_id" { type = string }
 variable "vnet_subnet_id" { type = string }
 variable "pod_subnet_id" { type = string }
+# add node_pool type def
 variable "enable_auto_scaling" { type = bool }
-# Configurable by module
 variable "name" { type = string }
 variable "vm_size" { type = string }
 variable "os_disk_size_gb" { type = number }

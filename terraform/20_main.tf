@@ -80,8 +80,9 @@ module "aks_user_pools" {
     in var.aks_config.node_pool_map : k => v
     if k != "aks_default_pool"
   }
-  vnet_subnet_id      = module.aks_subnets.aks_node_subnet_ids[each.key]
-  pod_subnet_id       = module.aks_subnets.aks_pod_subnet_ids[each.key]
+  vnet_subnet_id = module.aks_subnets.aks_node_subnet_ids[each.key]
+  pod_subnet_id  = module.aks_subnets.aks_pod_subnet_ids[each.key]
+  #node_pool           = var.aks_config.node_pool_map[each.key]
   vm_size             = var.aks_config.node_pool_map[each.key].vm_size
   zones               = var.aks_config.node_pool_map[each.key].zones
   enable_auto_scaling = var.aks_config.node_pool_map[each.key].enable_auto_scaling
