@@ -32,7 +32,7 @@ variable "aks_config" {
   default = {
     log_analytics_workspace_sku   = "PerGB2018"
     loadBalancer_type             = "loadBalancer"
-    location                      = "eastus"
+    location                      = "eastus2"
     rg                            = "my_aks_rg"
     nodes_rg                      = "my_nodes_rg"
     name                          = "aks-cluster"
