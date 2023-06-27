@@ -25,30 +25,8 @@ module "aks_nsg" {
   location            = module.aks_rg.rg_location
   name                = "${var.aks_config.name}-nsg"
 }
-
-# # Define the NSG associations for each node subnet
-# module "aks_subnets_nsg_associations_nodes" {
-#   source                    = "../modules/nsga"
-#   for_each                  = module.aks_subnets.aks_node_subnet_ids # <=== NODES!
-#   subnet_id                 = module.aks_subnets.aks_node_subnet_ids[each.key]
-#   network_security_group_id = module.aks_nsg.network_security_group_id
-# }
-# # Define the NSG associations for each pod subnet
-# module "aks_subnets_nsg_associations_pods" {
-#   source                    = "../modules/nsga"
-#   for_each                  = module.aks_subnets.aks_pod_subnet_ids  # <=== PODS!
-#   subnet_id                 = module.aks_subnets.aks_pod_subnet_ids[each.key]
-#   network_security_group_id = module.aks_nsg.network_security_group_id
-# }
-#   {
-#     for k, v
-#     in concat(
-#   module.aks_subnets.aks_pod_subnet_ids, # <=== PODS!
-#   module.aks_subnets.aks_node_subnet_ids # <=== NODES!
-# ) : k => v
-#   }
 # Define the NSG associations for each pod and node subnet
-module "aks_subnets_nsg_associations_pods" {
+module "aks_subnets_nsg_associations" {
   source = "../modules/nsga"
   for_each = {
     for k, v
@@ -57,10 +35,9 @@ module "aks_subnets_nsg_associations_pods" {
       values(module.aks_subnets.aks_node_subnet_ids) # <=== NODES!
     ) : k => v
   }
-  subnet_id                 = module.aks_subnets.aks_pod_subnet_ids[each.value]
+  subnet_id                 = each.value
   network_security_group_id = module.aks_nsg.network_security_group_id
 }
-
 # Define Network Security Group Rules for the AKS vnet
 module "aks_nsrs" {
   source                      = "../modules/aks_nsrs"
