@@ -25,19 +25,17 @@ module "aks_nsg" {
   location            = module.aks_rg.rg_location
   name                = "${var.aks_config.name}-nsg"
 }
-# Define the NSG associations for each node subnet
-module "aks_subnets_nsg_associations_nodes" {
+# Define the NSG associations for each pod and node subnet
+module "aks_subnets_nsg_associations" {
   source                    = "../modules/nsga"
-  for_each                  = module.aks_subnets.aks_node_subnet_ids
-  subnet_id                 = module.aks_subnets.aks_node_subnet_ids[each.key]
   network_security_group_id = module.aks_nsg.network_security_group_id
-}
-# Define the NSG associations for each pod subnet
-module "aks_subnets_nsg_associations_pods" {
-  source                    = "../modules/nsga"
-  for_each                  = module.aks_subnets.aks_pod_subnet_ids
-  subnet_id                 = module.aks_subnets.aks_pod_subnet_ids[each.key]
-  network_security_group_id = module.aks_nsg.network_security_group_id
+  for_each = {
+    for k, v in concat(
+      values(module.aks_subnets.aks_pod_subnet_ids), # <=== PODS!
+      values(module.aks_subnets.aks_node_subnet_ids) # <=== NODES!
+    ) : k => v
+  }
+  subnet_id = each.value
 }
 # Define Network Security Group Rules for the AKS vnet
 module "aks_nsrs" {
@@ -78,7 +76,7 @@ module "aks_user_pools" {
   for_each = {
     for k, v
     in var.aks_config.node_pool_map : k => v
-    if k != "aks_default_pool"
+    if k != "aks_default_pool" # excdlude default pool. It is created w/ cluster.
   }
   vnet_subnet_id = module.aks_subnets.aks_node_subnet_ids[each.key]
   pod_subnet_id  = module.aks_subnets.aks_pod_subnet_ids[each.key]
