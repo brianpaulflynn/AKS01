@@ -35,13 +35,14 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   public_network_access_enabled = var.aks_config.public_network_access_enabled
   private_cluster_enabled       = var.aks_config.private_cluster_enabled
   default_node_pool {
-    zones                        = var.aks_config.default_node_pool_zones
-    vm_size                      = var.aks_config.default_node_pool_sku
-    name                         = var.aks_config.default_node_pool_name
-    os_disk_size_gb              = var.aks_config.default_node_pool_os_disk_size_gb
-    min_count                    = var.aks_config.default_node_pool_min_count
-    max_count                    = var.aks_config.default_node_pool_max_count
-    max_pods                     = var.aks_config.default_node_pool_max_pods
+    zones           = var.aks_config.node_pool_map["aks_default_pool"].zones
+    vm_size         = var.aks_config.node_pool_map["aks_default_pool"].vm_size
+    name            = var.aks_config.node_pool_map["aks_default_pool"].name
+    os_disk_size_gb = var.aks_config.node_pool_map["aks_default_pool"].os_disk_size_gb
+    min_count       = var.aks_config.node_pool_map["aks_default_pool"].min_count
+    max_count       = var.aks_config.node_pool_map["aks_default_pool"].max_count
+    max_pods        = var.aks_config.node_pool_map["aks_default_pool"].max_pods
+
     vnet_subnet_id               = var.vnet_subnet_ids["aks_default_pool"]
     pod_subnet_id                = var.pod_subnet_ids["aks_default_pool"]
     only_critical_addons_enabled = true
