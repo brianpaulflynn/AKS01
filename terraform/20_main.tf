@@ -15,7 +15,6 @@ module "aks_log_analytics" {
   name                = "${var.aks_config.name}-analytics"
 }
 # Create aks cluster identity
-# Move this into the aks module
 module "aks_cluster_identity" {
   source              = "../modules/user_assigned_identity"
   resource_group_name = module.aks_dep_rg.rg_name
