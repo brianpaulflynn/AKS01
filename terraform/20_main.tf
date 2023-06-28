@@ -25,6 +25,13 @@ module "aks_nsg" {
   location            = module.aks_rg.rg_location
   name                = "${var.aks_config.name}-nsg"
 }
+# Define Network Security Group Rules for the AKS vnet
+module "aks_nsrs" {
+  source                      = "../modules/aks_nsrs"
+  resource_group_name         = module.aks_rg.rg_name
+  network_security_group_name = module.aks_nsg.network_security_group_name
+  node_pool_map               = var.aks_config.node_pool_map
+}
 # Define the NSG associations for each pod and node subnet
 module "aks_subnets_nsg_associations" {
   source                    = "../modules/nsga"
@@ -37,13 +44,6 @@ module "aks_subnets_nsg_associations" {
   }
   subnet_id = each.value
 }
-# Define Network Security Group Rules for the AKS vnet
-module "aks_nsrs" {
-  source                      = "../modules/aks_nsrs"
-  resource_group_name         = module.aks_rg.rg_name
-  network_security_group_name = module.aks_nsg.network_security_group_name
-  node_pool_map               = var.aks_config.node_pool_map
-}
 # Create Azure Log Analytics Workspace
 module "aks_log_analytics" {
   source              = "../modules/log_analytics_workspace"
@@ -54,8 +54,8 @@ module "aks_log_analytics" {
 }
 # Create aks cluster identity
 module "aks_cluster_identity" {
-  resource_group_name = module.aks_rg.rg_name
   source              = "../modules/user_assigned_identity"
+  resource_group_name = module.aks_rg.rg_name
   location            = var.aks_config.location
   name                = "${var.aks_config.name}-identity"
 }
