@@ -1,12 +1,12 @@
 #RG
-#resource "azurerm_resource_group" "aks_rg" {
 module "aks_rg" {
   source   = "../rg"
   location = var.aks_config.location
   name     = var.aks_config.rg
 }
 #VNET
-resource "azurerm_virtual_network" "aks_vnet" {
+module "aks_vnet" { #resource "azurerm_virtual_network" "aks_vnet" {
+  source              = "../vnet"
   resource_group_name = module.aks_rg.rg_name
   location            = module.aks_rg.rg_location
   name                = var.aks_config.vnet_name
@@ -16,7 +16,7 @@ resource "azurerm_virtual_network" "aks_vnet" {
 resource "azurerm_subnet" "aks_node_subnets" {
   for_each             = var.aks_config.node_pool_map
   resource_group_name  = module.aks_rg.rg_name
-  virtual_network_name = azurerm_virtual_network.aks_vnet.name
+  virtual_network_name = var.aks_config.vnet_name
   name                 = "${each.key}_nodes"              # <=== NODES!
   address_prefixes     = each.value.node_address_prefixes # <=== NODES!
   dynamic "delegation" {                                  # Grant cluster access to manage subnets
@@ -33,7 +33,7 @@ resource "azurerm_subnet" "aks_node_subnets" {
 resource "azurerm_subnet" "aks_pod_subnets" {
   for_each             = var.aks_config.node_pool_map
   resource_group_name  = module.aks_rg.rg_name
-  virtual_network_name = azurerm_virtual_network.aks_vnet.name
+  virtual_network_name = module.aks_vnet.vnet_name
   name                 = "${each.key}_pods"              # <=== PODS!
   address_prefixes     = each.value.pod_address_prefixes # <=== PODS!
   dynamic "delegation" {                                 # Grant cluster access to manage subnets
@@ -47,6 +47,14 @@ resource "azurerm_subnet" "aks_pod_subnets" {
     }
   }
 }
+######## TODO: work this in to replace the 2 resources above.
+# module "aks_subnets" {
+#   source               = "../modules/aks_subnet"
+#   resource_group_name  = module.aks_rg.rg_name
+#   virtual_network_name = module.aks_vnet.vnet_name
+#   node_pool_map        = var.aks_config.node_pool_map
+# }
+
 #NSG
 resource "azurerm_network_security_group" "aks_cluster_nsg" {
   name                = "${var.aks_config.name}-nsg"
