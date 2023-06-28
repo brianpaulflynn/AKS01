@@ -50,7 +50,7 @@ variable "aks_config" {
         pod_address_prefixes  = ["10.0.128.0/22"]
         max_pods              = 32 # Needs to be determined by network math. 
         # ex: 32= 2^(27-22)= 2^5. 30 is a common config value.
-        # Other obvious configs would be 2^6 for 64:1, 2^8 for 128:1, 2^9 for 256:1
+        # Other obvious configs would be 2^6 for 64:1, 2^7 for 128:1, 2^8 for 256:1
         # which would map to common configs of 110/pool or 250/pool (max value)
         # ex: /27 & /22 are /5 apart.  2^(27-22) = 2^5 That makes for 32:1 pods:nodes.
         #     /29 is the smallest Azure subnet. Provides 3 usable IPs.
@@ -68,7 +68,7 @@ variable "aks_config" {
         pod_address_prefixes  = ["10.0.132.0/22"]
         max_pods              = 32 # Do not exceed 2^(node_mask-pod_mask)
         # ex: 32= 2^(27-22)= 2^5. 30 is a common config value.
-        # Other obvious configs would be 2^6 for 64:1, 2^8 for 128:1, 2^9 for 256:1
+        # Other obvious configs would be 2^6 for 64:1, 2^7 for 128:1, 2^8 for 256:1
         # which would map to common configs of 110/pool or 250/pool (max value)
         # ex: /27 & /22 are /5 apart.  2^(27-22) = 2^5 That makes for 32:1 pods:nodes.
         #     /29 is the smallest Azure subnet. Provides 3 usable IPs.
@@ -86,7 +86,7 @@ variable "aks_config" {
         pod_address_prefixes  = ["10.0.136.0/22"]
         max_pods              = 32 # Needs to be determined by network math. 2^(node_mask-pod_mask)
         # ex: 32= 2^(27-22)= 2^5. 30 is a common config value.
-        # Other obvious configs would be 2^6 for 64:1, 2^8 for 128:1, 2^9 for 256:1
+        # Other obvious configs would be 2^6 for 64:1, 2^7 for 128:1, 2^8 for 256:1
         # which would map to common configs of 110/pool or 250/pool (max value)
         # ex: /27 & /22 are /5 apart.  2^(27-22) = 2^5 That makes for 32:1 pods:nodes.
         #     /29 is the smallest Azure subnet. Provides 3 usable IPs.
