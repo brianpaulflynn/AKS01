@@ -14,46 +14,46 @@ module "aks_vnet" {
 }
 #SUBNETS
 ######## TODO: work this in to replace the 2 resources below.
-# module "aks_subnets" {
-#   source               = "../modules/aks_subnet"
+module "aks_subnets" {
+  source               = "../aks_subnet"
+  resource_group_name  = module.aks_rg.rg_name
+  virtual_network_name = module.aks_vnet.vnet_name
+  node_pool_map        = var.aks_config.node_pool_map
+}
+# resource "azurerm_subnet" "aks_node_subnets" {
 #   resource_group_name  = module.aks_rg.rg_name
 #   virtual_network_name = module.aks_vnet.vnet_name
-#   node_pool_map        = var.aks_config.node_pool_map
+#   for_each             = var.aks_config.node_pool_map
+#   name                 = "${each.key}_nodes"              # <=== NODES!
+#   address_prefixes     = each.value.node_address_prefixes # <=== NODES!
+#   dynamic "delegation" {                                  # Grant cluster access to manage subnets
+#     for_each = each.key != "aks_default_pool" ? [each.key] : []
+#     content { # rem no delegation for default node pool
+#       name = "${each.key}_delegation"
+#       service_delegation {
+#         name    = "Microsoft.ContainerService/managedClusters"
+#         actions = ["Microsoft.Network/networkinterfaces/*"]
+#       }
+#     }
+#   }
 # }
-resource "azurerm_subnet" "aks_node_subnets" {
-  resource_group_name  = module.aks_rg.rg_name
-  virtual_network_name = module.aks_vnet.vnet_name
-  for_each             = var.aks_config.node_pool_map
-  name                 = "${each.key}_nodes"              # <=== NODES!
-  address_prefixes     = each.value.node_address_prefixes # <=== NODES!
-  dynamic "delegation" {                                  # Grant cluster access to manage subnets
-    for_each = each.key != "aks_default_pool" ? [each.key] : []
-    content { # rem no delegation for default node pool
-      name = "${each.key}_delegation"
-      service_delegation {
-        name    = "Microsoft.ContainerService/managedClusters"
-        actions = ["Microsoft.Network/networkinterfaces/*"]
-      }
-    }
-  }
-}
-resource "azurerm_subnet" "aks_pod_subnets" {
-  for_each             = var.aks_config.node_pool_map
-  resource_group_name  = module.aks_rg.rg_name
-  virtual_network_name = module.aks_vnet.vnet_name
-  name                 = "${each.key}_pods"              # <=== PODS!
-  address_prefixes     = each.value.pod_address_prefixes # <=== PODS!
-  dynamic "delegation" {                                 # Grant cluster access to manage subnets
-    for_each = each.key != "aks_default_pool" ? [each.key] : []
-    content { # rem no delegation for default node pool
-      name = "${each.key}_delegation"
-      service_delegation {
-        name    = "Microsoft.ContainerService/managedClusters"
-        actions = ["Microsoft.Network/networkinterfaces/*"]
-      }
-    }
-  }
-}
+# resource "azurerm_subnet" "aks_pod_subnets" {
+#   for_each             = var.aks_config.node_pool_map
+#   resource_group_name  = module.aks_rg.rg_name
+#   virtual_network_name = module.aks_vnet.vnet_name
+#   name                 = "${each.key}_pods"              # <=== PODS!
+#   address_prefixes     = each.value.pod_address_prefixes # <=== PODS!
+#   dynamic "delegation" {                                 # Grant cluster access to manage subnets
+#     for_each = each.key != "aks_default_pool" ? [each.key] : []
+#     content { # rem no delegation for default node pool
+#       name = "${each.key}_delegation"
+#       service_delegation {
+#         name    = "Microsoft.ContainerService/managedClusters"
+#         actions = ["Microsoft.Network/networkinterfaces/*"]
+#       }
+#     }
+#   }
+# }
 ##############################################################################
 #NSG
 module "aks_cluster_nsg" {
@@ -66,13 +66,10 @@ module "aks_cluster_nsg" {
 module "aks_subnets_nsg_associations" {
   source                    = "../nsga"
   network_security_group_id = module.aks_cluster_nsg.network_security_group_id
-  for_each = {
-    for subnet_name, subnet
-    in merge(azurerm_subnet.aks_node_subnets,
-      azurerm_subnet.aks_pod_subnets
-    )
-    : subnet_name => subnet.id
-  }
+  for_each = merge(
+    module.aks_subnets.aks_node_subnet_ids,
+    module.aks_subnets.aks_pod_subnet_ids
+  )
   subnet_id = each.value
 }
 #NSGR
@@ -198,8 +195,8 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     min_count                    = var.aks_config.node_pool_map["aks_default_pool"].min_count
     max_count                    = var.aks_config.node_pool_map["aks_default_pool"].max_count
     max_pods                     = var.aks_config.node_pool_map["aks_default_pool"].max_pods
-    vnet_subnet_id               = azurerm_subnet.aks_node_subnets["aks_default_pool"].id
-    pod_subnet_id                = azurerm_subnet.aks_pod_subnets["aks_default_pool"].id
+    vnet_subnet_id               = module.aks_subnets.aks_node_subnet_ids["aks_default_pool"]
+    pod_subnet_id                = module.aks_subnets.aks_pod_subnet_ids["aks_default_pool"]
     only_critical_addons_enabled = true
     enable_auto_scaling          = true
   }
@@ -212,8 +209,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "aks_node_pool" {
     in var.aks_config.node_pool_map : k => v
     if k != "aks_default_pool" # excdlude default pool. It is created w/ cluster.
   }
-  vnet_subnet_id      = azurerm_subnet.aks_node_subnets[each.key].id
-  pod_subnet_id       = azurerm_subnet.aks_pod_subnets[each.key].id
+  vnet_subnet_id      = module.aks_subnets.aks_node_subnet_ids[each.key]
+  pod_subnet_id       = module.aks_subnets.aks_pod_subnet_ids[each.key]
   enable_auto_scaling = var.aks_config.node_pool_map[each.key].enable_auto_scaling
   name                = var.aks_config.node_pool_map[each.key].name
   vm_size             = var.aks_config.node_pool_map[each.key].vm_size
