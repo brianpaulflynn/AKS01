@@ -21,7 +21,6 @@ module "aks_cluster_identity" {
   location            = var.aks_config.location
   name                = "${var.aks_config.name}-identity"
 }
-
 # AKS module
 module "aks_combined" {
   source                         = "../modules/aks_combined"
