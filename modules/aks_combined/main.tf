@@ -1,10 +1,10 @@
-#RG
+#AKS Resource Group
 module "aks_rg" {
   source   = "../rg"
   location = var.aks_config.location
   name     = var.aks_config.rg
 }
-#VNET
+#AKS Virtual Network
 module "aks_vnet" {
   source              = "../vnet"
   resource_group_name = module.aks_rg.rg_name
@@ -12,21 +12,21 @@ module "aks_vnet" {
   name                = var.aks_config.vnet_name
   address_space       = [var.aks_config.vnet_cidr]
 }
-#SUBNETS
+#AKS Subnets
 module "aks_subnets" {
   source               = "../aks_subnet"
   resource_group_name  = module.aks_rg.rg_name
   virtual_network_name = module.aks_vnet.vnet_name
   node_pool_map        = var.aks_config.node_pool_map
 }
-#NSG
+#AKS Network Security Group
 module "aks_cluster_nsg" {
   source              = "../nsg"
   resource_group_name = module.aks_rg.rg_name
   location            = module.aks_rg.rg_location
   name                = "${var.aks_config.name}-nsg"
 }
-#NSGAs
+#AKS Network Security Group Associations
 module "aks_subnets_nsg_associations" {
   source                    = "../nsga"
   network_security_group_id = module.aks_cluster_nsg.network_security_group_id
@@ -36,7 +36,7 @@ module "aks_subnets_nsg_associations" {
   )
   subnet_id = each.value
 }
-#NSGRs
+#AKS Network Security Group Rules
 module "aks_nsrs" {
   source                      = "../aks_nsrs"
   resource_group_name         = module.aks_rg.rg_name
@@ -100,8 +100,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "aks_node_pool" {
   for_each = {
     for k, v
     in var.aks_config.node_pool_map : k => v
-    if k != "aks_default_pool" # excdlude default pool. It is created w/ cluster.
-  }
+    if k != "aks_default_pool" # excdlude default pool; because
+  }                            # it is created w/ cluster.
   zones               = var.aks_config.node_pool_map[each.key].zones
   vm_size             = var.aks_config.node_pool_map[each.key].vm_size
   name                = var.aks_config.node_pool_map[each.key].name
