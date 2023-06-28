@@ -58,9 +58,9 @@ resource "azurerm_subnet" "aks_pod_subnets" {
 #NSG
 module "aks_cluster_nsg" {
   source              = "../nsg"
-  name                = "${var.aks_config.name}-nsg"
   resource_group_name = module.aks_rg.rg_name
   location            = module.aks_rg.rg_location
+  name                = "${var.aks_config.name}-nsg"
 }
 #NSGAs
 module "aks_subnets_nsg_associations" {
@@ -78,9 +78,9 @@ module "aks_subnets_nsg_associations" {
 #NSGR
 module "allow_pod_subnet_outbound" {
   source                      = "../nsr"
-  name                        = "allow-pod-subnet-outbound"
   resource_group_name         = module.aks_rg.rg_name
   network_security_group_name = module.aks_cluster_nsg.network_security_group_name
+  name                        = "allow-pod-subnet-outbound"
   priority                    = 100
   direction                   = "Outbound"
   access                      = "Allow"
@@ -95,9 +95,9 @@ module "allow_pod_subnet_outbound" {
 }
 module "allow_pod_to_pod" {
   source                      = "../nsr"
-  name                        = "allow-pod-to-pod-inbound"
   resource_group_name         = module.aks_rg.rg_name
   network_security_group_name = module.aks_cluster_nsg.network_security_group_name
+  name                        = "allow-pod-to-pod-inbound"
   priority                    = 100
   direction                   = "Inbound"
   access                      = "Allow"
@@ -115,9 +115,9 @@ module "allow_pod_to_pod" {
 }
 module "deny_node_to_pod_subnet" {
   source                      = "../nsr"
-  name                        = "deny-node-to-pod-subnet"
   resource_group_name         = module.aks_rg.rg_name
   network_security_group_name = module.aks_cluster_nsg.network_security_group_name
+  name                        = "deny-node-to-pod-subnet"
   priority                    = 101
   direction                   = "Inbound"
   access                      = "Deny"
@@ -135,9 +135,9 @@ module "deny_node_to_pod_subnet" {
 }
 module "deny_pod_to_node_subnet" {
   source                      = "../nsr"
-  name                        = "deny-pod-to-node-subnet"
   resource_group_name         = module.aks_rg.rg_name
   network_security_group_name = module.aks_cluster_nsg.network_security_group_name
+  name                        = "deny-pod-to-node-subnet"
   priority                    = 102
   direction                   = "Inbound"
   access                      = "Deny"
@@ -155,8 +155,8 @@ module "deny_pod_to_node_subnet" {
 }
 # AKS Cluster
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
-  location                  = var.aks_config.location
-  resource_group_name       = var.aks_config.rg
+  resource_group_name       = module.aks_rg.rg_name
+  location                  = module.aks_rg.rg_location
   azure_policy_enabled      = true # Best Practice
   open_service_mesh_enabled = true # Best Practice
   local_account_disabled    = true # Best Practice. And required by AAD integration.
@@ -206,15 +206,13 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
 }
 #Define User Pools
 resource "azurerm_kubernetes_cluster_node_pool" "aks_node_pool" {
-  # module "aks_user_pools" {
-  #   source                = "../aks_node_pool"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks_cluster.id
   for_each = {
     for k, v
     in var.aks_config.node_pool_map : k => v
     if k != "aks_default_pool" # excdlude default pool. It is created w/ cluster.
   }
-  vnet_subnet_id      = azurerm_subnet.aks_pod_subnets[each.key].id
+  vnet_subnet_id      = azurerm_subnet.aks_node_subnets[each.key].id
   pod_subnet_id       = azurerm_subnet.aks_pod_subnets[each.key].id
   enable_auto_scaling = var.aks_config.node_pool_map[each.key].enable_auto_scaling
   name                = var.aks_config.node_pool_map[each.key].name
