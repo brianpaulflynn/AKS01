@@ -13,48 +13,12 @@ module "aks_vnet" {
   address_space       = [var.aks_config.vnet_cidr]
 }
 #SUBNETS
-######## TODO: work this in to replace the 2 resources below.
 module "aks_subnets" {
   source               = "../aks_subnet"
   resource_group_name  = module.aks_rg.rg_name
   virtual_network_name = module.aks_vnet.vnet_name
   node_pool_map        = var.aks_config.node_pool_map
 }
-# resource "azurerm_subnet" "aks_node_subnets" {
-#   resource_group_name  = module.aks_rg.rg_name
-#   virtual_network_name = module.aks_vnet.vnet_name
-#   for_each             = var.aks_config.node_pool_map
-#   name                 = "${each.key}_nodes"              # <=== NODES!
-#   address_prefixes     = each.value.node_address_prefixes # <=== NODES!
-#   dynamic "delegation" {                                  # Grant cluster access to manage subnets
-#     for_each = each.key != "aks_default_pool" ? [each.key] : []
-#     content { # rem no delegation for default node pool
-#       name = "${each.key}_delegation"
-#       service_delegation {
-#         name    = "Microsoft.ContainerService/managedClusters"
-#         actions = ["Microsoft.Network/networkinterfaces/*"]
-#       }
-#     }
-#   }
-# }
-# resource "azurerm_subnet" "aks_pod_subnets" {
-#   for_each             = var.aks_config.node_pool_map
-#   resource_group_name  = module.aks_rg.rg_name
-#   virtual_network_name = module.aks_vnet.vnet_name
-#   name                 = "${each.key}_pods"              # <=== PODS!
-#   address_prefixes     = each.value.pod_address_prefixes # <=== PODS!
-#   dynamic "delegation" {                                 # Grant cluster access to manage subnets
-#     for_each = each.key != "aks_default_pool" ? [each.key] : []
-#     content { # rem no delegation for default node pool
-#       name = "${each.key}_delegation"
-#       service_delegation {
-#         name    = "Microsoft.ContainerService/managedClusters"
-#         actions = ["Microsoft.Network/networkinterfaces/*"]
-#       }
-#     }
-#   }
-# }
-##############################################################################
 #NSG
 module "aks_cluster_nsg" {
   source              = "../nsg"
@@ -73,7 +37,7 @@ module "aks_subnets_nsg_associations" {
   subnet_id = each.value
 }
 #NSGR
-module "allow_pod_subnet_outbound" {
+module "nsgr_allow_pod_subnet_outbound" {
   source                      = "../nsr"
   resource_group_name         = module.aks_rg.rg_name
   network_security_group_name = module.aks_cluster_nsg.network_security_group_name
@@ -90,7 +54,7 @@ module "allow_pod_subnet_outbound" {
   )
   destination_address_prefixes = ["0.0.0.0/0"]
 }
-module "allow_pod_to_pod" {
+module "nsgr_allow_pod_to_pod" {
   source                      = "../nsr"
   resource_group_name         = module.aks_rg.rg_name
   network_security_group_name = module.aks_cluster_nsg.network_security_group_name
@@ -110,7 +74,7 @@ module "allow_pod_to_pod" {
     var.aks_config.node_pool_map["aks_user_pool_2"].pod_address_prefixes
   )
 }
-module "deny_node_to_pod_subnet" {
+module "nsgr_deny_node_to_pod_subnet" {
   source                      = "../nsr"
   resource_group_name         = module.aks_rg.rg_name
   network_security_group_name = module.aks_cluster_nsg.network_security_group_name
@@ -130,7 +94,7 @@ module "deny_node_to_pod_subnet" {
     var.aks_config.node_pool_map["aks_user_pool_2"].pod_address_prefixes
   )
 }
-module "deny_pod_to_node_subnet" {
+module "nsgr_deny_pod_to_node_subnet" {
   source                      = "../nsr"
   resource_group_name         = module.aks_rg.rg_name
   network_security_group_name = module.aks_cluster_nsg.network_security_group_name
