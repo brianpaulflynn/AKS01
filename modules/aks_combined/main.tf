@@ -36,7 +36,7 @@ module "aks_subnets_nsg_associations" {
   )
   subnet_id = each.value
 }
-#NSGR
+#NSGRs
 module "nsgr_allow_pod_subnet_outbound" {
   source                      = "../nsr"
   resource_group_name         = module.aks_rg.rg_name
@@ -161,29 +161,30 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     max_pods                     = var.aks_config.node_pool_map["aks_default_pool"].max_pods
     vnet_subnet_id               = module.aks_subnets.aks_node_subnet_ids["aks_default_pool"]
     pod_subnet_id                = module.aks_subnets.aks_pod_subnet_ids["aks_default_pool"]
-    only_critical_addons_enabled = true
     enable_auto_scaling          = true
+    only_critical_addons_enabled = true
   }
 }
 #Define User Pools
 resource "azurerm_kubernetes_cluster_node_pool" "aks_node_pool" {
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.aks_cluster.id
-  for_each = {
-    for k, v
-    in var.aks_config.node_pool_map : k => v
-    if k != "aks_default_pool" # excdlude default pool. It is created w/ cluster.
-  }
-  vnet_subnet_id      = module.aks_subnets.aks_node_subnet_ids[each.key]
-  pod_subnet_id       = module.aks_subnets.aks_pod_subnet_ids[each.key]
-  enable_auto_scaling = var.aks_config.node_pool_map[each.key].enable_auto_scaling
-  name                = var.aks_config.node_pool_map[each.key].name
-  vm_size             = var.aks_config.node_pool_map[each.key].vm_size
-  os_disk_size_gb     = var.aks_config.node_pool_map[each.key].os_disk_size_gb
-  zones               = var.aks_config.node_pool_map[each.key].zones
-  min_count           = var.aks_config.node_pool_map[each.key].min_count
-  max_count           = var.aks_config.node_pool_map[each.key].max_count
-  max_pods            = var.aks_config.node_pool_map[each.key].max_pods
-  tags = {
+    kubernetes_cluster_id = azurerm_kubernetes_cluster.aks_cluster.id
+    for_each = {
+        for k, v
+        in var.aks_config.node_pool_map : k => v
+        if k != "aks_default_pool" # excdlude default pool. It is created w/ cluster.
+    }
+    zones               = var.aks_config.node_pool_map[each.key].zones
+    vm_size             = var.aks_config.node_pool_map[each.key].vm_size
+    name                = var.aks_config.node_pool_map[each.key].name
+    os_disk_size_gb     = var.aks_config.node_pool_map[each.key].os_disk_size_gb
+    min_count           = var.aks_config.node_pool_map[each.key].min_count
+    max_count           = var.aks_config.node_pool_map[each.key].max_count
+    max_pods            = var.aks_config.node_pool_map[each.key].max_pods
+    enable_auto_scaling = var.aks_config.node_pool_map[each.key].enable_auto_scaling
+    vnet_subnet_id      = module.aks_subnets.aks_node_subnet_ids[each.key]
+    pod_subnet_id       = module.aks_subnets.aks_pod_subnet_ids[each.key]
+    enable_auto_scaling          = true
+    tags = {
     Environment = var.aks_config.node_pool_map[each.key].Environment
-  }
+    }
 }
