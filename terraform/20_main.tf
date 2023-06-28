@@ -4,9 +4,8 @@ module "aks_dep_rg" {
   location = var.aks_config.location
   name     = "${var.aks_config.name}-dependencies"
 }
-
 # Create Azure Log Analytics Workspace
-# Keep this out of the aks module?
+# Keep this out of the aks module? As an external dependency?
 module "aks_log_analytics" {
   source              = "../modules/log_analytics_workspace"
   resource_group_name = module.aks_dep_rg.rg_name
@@ -15,6 +14,7 @@ module "aks_log_analytics" {
   name                = "${var.aks_config.name}-analytics"
 }
 # Create aks cluster identity
+# Keep this out of the aks module? As an external dependency?
 module "aks_cluster_identity" {
   source              = "../modules/user_assigned_identity"
   resource_group_name = module.aks_dep_rg.rg_name
