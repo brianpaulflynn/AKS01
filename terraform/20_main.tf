@@ -22,7 +22,7 @@ module "aks_cluster_identity" {
 }
 
 #########################################
-# # AKS parts all combined into 1 module
+# # AKS combined into 1 module
 #########################################
 # AKS module
 module "aks_combined" {
@@ -33,7 +33,7 @@ module "aks_combined" {
   aks_config                     = var.aks_config
 }
 #########################################
-# # AKS Combined in more modules
+# # AKS in more modules
 #########################################
 # # Define the resource group
 # module "aks_rg" {
