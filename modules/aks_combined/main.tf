@@ -168,14 +168,13 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   public_network_access_enabled = var.aks_config.public_network_access_enabled
   private_cluster_enabled       = var.aks_config.private_cluster_enabled
   default_node_pool {
-    zones           = var.aks_config.node_pool_map["aks_default_pool"].zones
-    vm_size         = var.aks_config.node_pool_map["aks_default_pool"].vm_size
-    name            = var.aks_config.node_pool_map["aks_default_pool"].name
-    os_disk_size_gb = var.aks_config.node_pool_map["aks_default_pool"].os_disk_size_gb
-    min_count       = var.aks_config.node_pool_map["aks_default_pool"].min_count
-    max_count       = var.aks_config.node_pool_map["aks_default_pool"].max_count
-    max_pods        = var.aks_config.node_pool_map["aks_default_pool"].max_pods
-
+    zones                        = var.aks_config.node_pool_map["aks_default_pool"].zones
+    vm_size                      = var.aks_config.node_pool_map["aks_default_pool"].vm_size
+    name                         = var.aks_config.node_pool_map["aks_default_pool"].name
+    os_disk_size_gb              = var.aks_config.node_pool_map["aks_default_pool"].os_disk_size_gb
+    min_count                    = var.aks_config.node_pool_map["aks_default_pool"].min_count
+    max_count                    = var.aks_config.node_pool_map["aks_default_pool"].max_count
+    max_pods                     = var.aks_config.node_pool_map["aks_default_pool"].max_pods
     vnet_subnet_id               = azurerm_subnet.aks_node_subnets["aks_default_pool"].id
     pod_subnet_id                = azurerm_subnet.aks_pod_subnets["aks_default_pool"].id
     only_critical_addons_enabled = true
@@ -187,13 +186,23 @@ output "aks_cluster_id" {
 }
 #Define User Pools
 resource "azurerm_kubernetes_cluster_node_pool" "aks_node_pool" {
-  kubernetes_cluster_id = module.aks_cluster.aks_cluster_id
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.aks_cluster.id
   for_each = {
     for k, v
     in var.aks_config.node_pool_map : k => v
     if k != "aks_default_pool" # excdlude default pool. It is created w/ cluster.
   }
-  vnet_subnet_id = module.aks_subnets.aks_node_subnet_ids[each.key]
-  pod_subnet_id  = module.aks_subnets.aks_pod_subnet_ids[each.key]
-  node_pool      = var.aks_config.node_pool_map[each.key]
+  vnet_subnet_id      = azurerm_subnet.aks_pod_subnets[each.key].id
+  pod_subnet_id       = azurerm_subnet.aks_pod_subnets[each.key].id
+  enable_auto_scaling = var.aks_config.node_pool_map[each.key].enable_auto_scaling
+  name                = var.aks_config.node_pool_map[each.key].name
+  vm_size             = var.aks_config.node_pool_map[each.key].vm_size
+  os_disk_size_gb     = var.aks_config.node_pool_map[each.key].os_disk_size_gb
+  zones               = var.aks_config.node_pool_map[each.key].zones
+  min_count           = var.aks_config.node_pool_map[each.key].min_count
+  max_count           = var.aks_config.node_pool_map[each.key].max_count
+  max_pods            = var.aks_config.node_pool_map[each.key].max_pods
+  tags = {
+    Environment = var.aks_config.node_pool_map[each.key].Environment
+  }
 }

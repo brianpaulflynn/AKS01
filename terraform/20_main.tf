@@ -22,19 +22,12 @@ module "aks_cluster_identity" {
 }
 
 # AKS Combined
-module "aks_cluster_combined" {
+module "aks_combined" {
   source                         = "../modules/aks_combined"
   aks_managed_identity_ids       = [module.aks_cluster_identity.identity_id]
   aks_log_analytics_workspace_id = module.aks_log_analytics.log_analytics_workspace_id
   AD_GROUP_ID                    = var.AD_GROUP_ID # TF Env Var
   aks_config                     = var.aks_config
-  # roll these up into one ask_config = var.aks_config
-  # location                       = var.aks_config.location
-  # resource_group_name            = var.aks_config.rg
-  # vnet_name                      = var.aks_config.vnet_name
-  # address_space                  = [var.aks_config.vnet_cidr]
-  # node_pool_map                  = var.aks_config.node_pool_map
-  # aks_config                     = var.aks_config
 }
 
 # # Define the resource group
@@ -93,7 +86,6 @@ module "aks_cluster_combined" {
 #   AD_GROUP_ID                    = var.AD_GROUP_ID # TF Env Var
 #   aks_config                     = var.aks_config
 # }
-
 # #Define User Pools
 # module "aks_user_pools" {
 #   source                = "../modules/aks_node_pool"
