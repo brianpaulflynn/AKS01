@@ -21,7 +21,10 @@ module "aks_cluster_identity" {
   name                = "${var.aks_config.name}-identity"
 }
 
-# AKS Combined
+#########################################
+# # AKS parts all combined into 1 module
+#########################################
+# AKS module
 module "aks_combined" {
   source                         = "../modules/aks_combined"
   aks_managed_identity_ids       = [module.aks_cluster_identity.identity_id]
@@ -29,7 +32,9 @@ module "aks_combined" {
   AD_GROUP_ID                    = var.AD_GROUP_ID # TF Env Var
   aks_config                     = var.aks_config
 }
-
+#########################################
+# # AKS Combined in more modules
+#########################################
 # # Define the resource group
 # module "aks_rg" {
 #   source   = "../modules/rg"
