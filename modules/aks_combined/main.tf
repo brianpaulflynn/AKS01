@@ -54,6 +54,7 @@ resource "azurerm_subnet" "aks_pod_subnets" {
     }
   }
 }
+##############################################################################
 #NSG
 module "aks_cluster_nsg" {
   source              = "../nsg"
