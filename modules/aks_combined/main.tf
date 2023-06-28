@@ -41,8 +41,8 @@ module "aks_nsrs" {
   source                      = "../aks_nsrs"
   resource_group_name         = module.aks_rg.rg_name
   network_security_group_name = module.aks_cluster_nsg.network_security_group_name
-  node_subnet_prefixes        = module.aks_subnets.aks_node_address_prefixes
-  pod_subnet_prefixes         = module.aks_subnets.aks_pod_address_prefixes
+  node_subnet_prefixes        = flatten(values(module.aks_subnets.aks_node_address_prefixes))
+  pod_subnet_prefixes         = flatten(values(module.aks_subnets.aks_pod_address_prefixes))
 }
 # AKS Cluster
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
