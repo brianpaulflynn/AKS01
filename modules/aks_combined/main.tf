@@ -1,20 +1,29 @@
 #RG
-resource "azurerm_resource_group" "aks_rg" {
+module "aks_rg" {
+  source   = "../rg"
   location = var.aks_config.location
   name     = var.aks_config.rg
 }
 #VNET
-resource "azurerm_virtual_network" "aks_vnet" {
-  resource_group_name = azurerm_resource_group.aks_rg.name
-  location            = azurerm_resource_group.aks_rg.location
+module "aks_vnet" {
+  source              = "../vnet"
+  resource_group_name = module.aks_rg.rg_name
+  location            = module.aks_rg.rg_location
   name                = var.aks_config.vnet_name
   address_space       = [var.aks_config.vnet_cidr]
 }
 #SUBNETS
+######## TODO: work this in to replace the 2 resources below.
+# module "aks_subnets" {
+#   source               = "../modules/aks_subnet"
+#   resource_group_name  = module.aks_rg.rg_name
+#   virtual_network_name = module.aks_vnet.vnet_name
+#   node_pool_map        = var.aks_config.node_pool_map
+# }
 resource "azurerm_subnet" "aks_node_subnets" {
+  resource_group_name  = module.aks_rg.rg_name
+  virtual_network_name = module.aks_vnet.vnet_name
   for_each             = var.aks_config.node_pool_map
-  resource_group_name  = azurerm_resource_group.aks_rg.name
-  virtual_network_name = azurerm_virtual_network.aks_vnet.name
   name                 = "${each.key}_nodes"              # <=== NODES!
   address_prefixes     = each.value.node_address_prefixes # <=== NODES!
   dynamic "delegation" {                                  # Grant cluster access to manage subnets
@@ -30,8 +39,8 @@ resource "azurerm_subnet" "aks_node_subnets" {
 }
 resource "azurerm_subnet" "aks_pod_subnets" {
   for_each             = var.aks_config.node_pool_map
-  resource_group_name  = azurerm_resource_group.aks_rg.name
-  virtual_network_name = azurerm_virtual_network.aks_vnet.name
+  resource_group_name  = module.aks_rg.rg_name
+  virtual_network_name = module.aks_vnet.vnet_name
   name                 = "${each.key}_pods"              # <=== PODS!
   address_prefixes     = each.value.pod_address_prefixes # <=== PODS!
   dynamic "delegation" {                                 # Grant cluster access to manage subnets
@@ -45,23 +54,33 @@ resource "azurerm_subnet" "aks_pod_subnets" {
     }
   }
 }
+##############################################################################
 #NSG
-resource "azurerm_network_security_group" "aks_cluster_nsg" {
+module "aks_cluster_nsg" {
+  source              = "../nsg"
+  resource_group_name = module.aks_rg.rg_name
+  location            = module.aks_rg.rg_location
   name                = "${var.aks_config.name}-nsg"
-  resource_group_name = azurerm_resource_group.aks_rg.name
-  location            = azurerm_resource_group.aks_rg.location
 }
 #NSGAs
-resource "azurerm_subnet_network_security_group_association" "subnet_nsg_associations" {
-  for_each                  = merge(azurerm_subnet.aks_node_subnets, azurerm_subnet.aks_node_subnets)
-  subnet_id                 = each.value.id
-  network_security_group_id = azurerm_network_security_group.aks_cluster_nsg.id
+module "aks_subnets_nsg_associations" {
+  source                    = "../nsga"
+  network_security_group_id = module.aks_cluster_nsg.network_security_group_id
+  for_each = {
+    for subnet_name, subnet
+    in merge(azurerm_subnet.aks_node_subnets,
+      azurerm_subnet.aks_pod_subnets
+    )
+    : subnet_name => subnet.id
+  }
+  subnet_id = each.value
 }
 #NSGR
-resource "azurerm_network_security_rule" "allow_pod_subnet_outbound" {
+module "allow_pod_subnet_outbound" {
+  source                      = "../nsr"
+  resource_group_name         = module.aks_rg.rg_name
+  network_security_group_name = module.aks_cluster_nsg.network_security_group_name
   name                        = "allow-pod-subnet-outbound"
-  resource_group_name         = azurerm_resource_group.aks_rg.name                  # var.resource_group_name
-  network_security_group_name = azurerm_network_security_group.aks_cluster_nsg.name # var.network_security_group_name
   priority                    = 100
   direction                   = "Outbound"
   access                      = "Allow"
@@ -74,10 +93,11 @@ resource "azurerm_network_security_rule" "allow_pod_subnet_outbound" {
   )
   destination_address_prefixes = ["0.0.0.0/0"]
 }
-resource "azurerm_network_security_rule" "allow_pod_to_pod" {
+module "allow_pod_to_pod" {
+  source                      = "../nsr"
+  resource_group_name         = module.aks_rg.rg_name
+  network_security_group_name = module.aks_cluster_nsg.network_security_group_name
   name                        = "allow-pod-to-pod-inbound"
-  resource_group_name         = azurerm_resource_group.aks_rg.name                  # var.resource_group_name
-  network_security_group_name = azurerm_network_security_group.aks_cluster_nsg.name # var.network_security_group_name
   priority                    = 100
   direction                   = "Inbound"
   access                      = "Allow"
@@ -93,10 +113,11 @@ resource "azurerm_network_security_rule" "allow_pod_to_pod" {
     var.aks_config.node_pool_map["aks_user_pool_2"].pod_address_prefixes
   )
 }
-resource "azurerm_network_security_rule" "deny_node_to_pod_subnet" {
+module "deny_node_to_pod_subnet" {
+  source                      = "../nsr"
+  resource_group_name         = module.aks_rg.rg_name
+  network_security_group_name = module.aks_cluster_nsg.network_security_group_name
   name                        = "deny-node-to-pod-subnet"
-  resource_group_name         = azurerm_resource_group.aks_rg.name                  # var.resource_group_name
-  network_security_group_name = azurerm_network_security_group.aks_cluster_nsg.name # var.network_security_group_name
   priority                    = 101
   direction                   = "Inbound"
   access                      = "Deny"
@@ -112,10 +133,11 @@ resource "azurerm_network_security_rule" "deny_node_to_pod_subnet" {
     var.aks_config.node_pool_map["aks_user_pool_2"].pod_address_prefixes
   )
 }
-resource "azurerm_network_security_rule" "deny_pod_to_node_subnet" {
+module "deny_pod_to_node_subnet" {
+  source                      = "../nsr"
+  resource_group_name         = module.aks_rg.rg_name
+  network_security_group_name = module.aks_cluster_nsg.network_security_group_name
   name                        = "deny-pod-to-node-subnet"
-  resource_group_name         = azurerm_resource_group.aks_rg.name                  # var.resource_group_name
-  network_security_group_name = azurerm_network_security_group.aks_cluster_nsg.name # var.network_security_group_name
   priority                    = 102
   direction                   = "Inbound"
   access                      = "Deny"
@@ -131,9 +153,10 @@ resource "azurerm_network_security_rule" "deny_pod_to_node_subnet" {
     var.aks_config.node_pool_map["aks_user_pool_2"].node_address_prefixes
   )
 }
+# AKS Cluster
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
-  location                  = var.aks_config.location
-  resource_group_name       = var.aks_config.rg
+  resource_group_name       = module.aks_rg.rg_name
+  location                  = module.aks_rg.rg_location
   azure_policy_enabled      = true # Best Practice
   open_service_mesh_enabled = true # Best Practice
   local_account_disabled    = true # Best Practice. And required by AAD integration.
@@ -181,9 +204,6 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     enable_auto_scaling          = true
   }
 }
-output "aks_cluster_id" {
-  value = azurerm_kubernetes_cluster.aks_cluster.id
-}
 #Define User Pools
 resource "azurerm_kubernetes_cluster_node_pool" "aks_node_pool" {
   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks_cluster.id
@@ -192,7 +212,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "aks_node_pool" {
     in var.aks_config.node_pool_map : k => v
     if k != "aks_default_pool" # excdlude default pool. It is created w/ cluster.
   }
-  vnet_subnet_id      = azurerm_subnet.aks_pod_subnets[each.key].id
+  vnet_subnet_id      = azurerm_subnet.aks_node_subnets[each.key].id
   pod_subnet_id       = azurerm_subnet.aks_pod_subnets[each.key].id
   enable_auto_scaling = var.aks_config.node_pool_map[each.key].enable_auto_scaling
   name                = var.aks_config.node_pool_map[each.key].name
