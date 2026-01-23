@@ -3,11 +3,11 @@ variable "ARM_TENANT_ID" { type = string }
 variable "ARM_CLIENT_ID" { type = string }
 variable "ARM_CLIENT_SECRET" { type = string }
 terraform {
-  required_version = ">=1.0"
+  required_version = ">=1.6"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">=3.60.0"
+      version = ">=4.58.0"
     }
   }
 }
