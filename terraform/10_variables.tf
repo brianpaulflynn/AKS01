@@ -12,21 +12,21 @@ variable "aks_config" {
     service_cidr                  = string
     service_dns                   = string
     vnet_cidr                     = string
-    run_command_enabled           = string
-    public_network_access_enabled = string
-    private_cluster_enabled       = string
+    run_command_enabled           = bool
+    public_network_access_enabled = bool
+    private_cluster_enabled       = bool
     node_pool_map = map(object({
       node_address_prefixes = list(string)
       pod_address_prefixes  = list(string)
-      max_pods              = string
+      max_pods              = number
       name                  = string
       Environment           = string
       vm_size               = string
-      os_disk_size_gb       = string
+      os_disk_size_gb       = number
       zones                 = list(number)
-      enable_auto_scaling   = string
-      min_count             = string
-      max_count             = string
+      enable_auto_scaling   = bool
+      min_count             = number
+      max_count             = number
     }))
   })
   default = {
