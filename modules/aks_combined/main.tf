@@ -54,7 +54,6 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   #role_based_access_control_enabled = true          # does this conflict with azure_rbac_enabled?
   azure_active_directory_role_based_access_control { # AAD interated
     azure_rbac_enabled     = true                    # with RBAC permissions granularity
-    managed                = true                    # managed by AD Group
     admin_group_object_ids = [var.AD_GROUP_ID]       # from TF_VARS
   }                                                  # for some AAD group identifier
   identity {                                         # Managed Identity
@@ -75,12 +74,14 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     service_cidr   = var.aks_config.service_cidr
     dns_service_ip = var.aks_config.service_dns
   }
-  name                          = var.aks_config.name
-  node_resource_group           = var.aks_config.nodes_rg
-  dns_prefix                    = var.aks_config.dns_prefix
-  run_command_enabled           = var.aks_config.run_command_enabled
-  public_network_access_enabled = var.aks_config.public_network_access_enabled
-  private_cluster_enabled       = var.aks_config.private_cluster_enabled
+  name                    = var.aks_config.name
+  node_resource_group     = var.aks_config.nodes_rg
+  dns_prefix              = var.aks_config.dns_prefix
+  run_command_enabled     = var.aks_config.run_command_enabled
+  private_cluster_enabled = var.aks_config.private_cluster_enabled
+  api_server_access_profile {
+    authorized_ip_ranges = var.aks_config.public_network_access_enabled ? [] : null
+  }
   default_node_pool {
     zones                        = var.aks_config.node_pool_map["aks_default_pool"].zones
     vm_size                      = var.aks_config.node_pool_map["aks_default_pool"].vm_size
@@ -91,7 +92,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     max_pods                     = var.aks_config.node_pool_map["aks_default_pool"].max_pods
     vnet_subnet_id               = module.aks_subnets.aks_node_subnet_ids["aks_default_pool"]
     pod_subnet_id                = module.aks_subnets.aks_pod_subnet_ids["aks_default_pool"]
-    enable_auto_scaling          = true
+    auto_scaling_enabled         = var.aks_config.node_pool_map["aks_default_pool"].enable_auto_scaling
     only_critical_addons_enabled = true
   }
 }
@@ -103,16 +104,16 @@ resource "azurerm_kubernetes_cluster_node_pool" "aks_node_pool" {
     in var.aks_config.node_pool_map : k => v
     if k != "aks_default_pool" # excdlude default pool; because
   }                            # it is created w/ cluster.
-  zones               = var.aks_config.node_pool_map[each.key].zones
-  vm_size             = var.aks_config.node_pool_map[each.key].vm_size
-  name                = var.aks_config.node_pool_map[each.key].name
-  os_disk_size_gb     = var.aks_config.node_pool_map[each.key].os_disk_size_gb
-  min_count           = var.aks_config.node_pool_map[each.key].min_count
-  max_count           = var.aks_config.node_pool_map[each.key].max_count
-  max_pods            = var.aks_config.node_pool_map[each.key].max_pods
-  enable_auto_scaling = var.aks_config.node_pool_map[each.key].enable_auto_scaling
-  vnet_subnet_id      = module.aks_subnets.aks_node_subnet_ids[each.key]
-  pod_subnet_id       = module.aks_subnets.aks_pod_subnet_ids[each.key]
+  zones                = var.aks_config.node_pool_map[each.key].zones
+  vm_size              = var.aks_config.node_pool_map[each.key].vm_size
+  name                 = var.aks_config.node_pool_map[each.key].name
+  os_disk_size_gb      = var.aks_config.node_pool_map[each.key].os_disk_size_gb
+  min_count            = var.aks_config.node_pool_map[each.key].min_count
+  max_count            = var.aks_config.node_pool_map[each.key].max_count
+  max_pods             = var.aks_config.node_pool_map[each.key].max_pods
+  auto_scaling_enabled = var.aks_config.node_pool_map[each.key].enable_auto_scaling
+  vnet_subnet_id       = module.aks_subnets.aks_node_subnet_ids[each.key]
+  pod_subnet_id        = module.aks_subnets.aks_pod_subnet_ids[each.key]
   tags = {
     Environment = var.aks_config.node_pool_map[each.key].Environment
   }
